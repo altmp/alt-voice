@@ -1,0 +1,10 @@
+temp
+bin/*
+lib/
+libs/
+.vs
+.vscode
+build
+.xmake
+vsxmake*
+*.pdb
