@@ -7,4 +7,5 @@ libs/
 build
 .xmake
 vsxmake*
+vs2022
 *.pdb

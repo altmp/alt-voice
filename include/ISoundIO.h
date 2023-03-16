@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include "VoiceError.h"
 
 using OnVoiceCallback = void(*)(void* buffer, uint32_t size);
 

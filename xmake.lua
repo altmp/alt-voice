@@ -24,7 +24,7 @@ else
     set_runtimes("MD")
 end
 
-add_requires("bass", "bassmix", "libopus")
+add_requires("bass", "bassmix", "libopus", "libevent", "glog", "vcpkg::evpp")
 
 target("alt-voice")
     set_default(true)

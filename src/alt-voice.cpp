@@ -53,22 +53,6 @@ const char * AV_GetVoiceErrorText(AltVoiceError error)
 	{
 	case AltVoiceError::Ok:
 		return "No error";
-	case AltVoiceError::DeviceOpenError:
-		return "Device open error";
-	case AltVoiceError::ContextSetError:
-		return "Context set error";
-	case AltVoiceError::SourcesCreateError:
-		return "Source create error";
-	case AltVoiceError::BufferCreateError_InvalidName:
-		return "Buffer create error. Invalid name";
-	case AltVoiceError::BufferCreateError_InvalidEnum:
-		return "Buffer create error. Invalid enum";
-	case AltVoiceError::BufferCreateError_InvalidValue:
-		return "Buffer create error. Invalid value";
-	case AltVoiceError::BufferCreateError_InvalidOperation:
-		return "Buffer create error. Invalid operation";
-	case AltVoiceError::BufferCreateError_OutOfMemory:
-		return "Buffer create error. Out of memory";
 	case AltVoiceError::OpusEncoderCreateError:
 		return "Encoder create error";
 	case AltVoiceError::OpusDecoderCreateError:
@@ -77,8 +61,6 @@ const char * AV_GetVoiceErrorText(AltVoiceError error)
 		return "Opus bitrate set error";
 	case AltVoiceError::OpusSignalSetError:
 		return "Opus signal set error";
-	case AltVoiceError::DenoiseInitError:
-		return "Denoiser init error";
 	}
 	return "Unknown error";
 }
