@@ -16,10 +16,10 @@ using namespace helpers;
 
 class CSoundInput : public ISoundIO
 {
-	int deviceId;
-	int deviceIdx;
-	HRECORD recordChannel;
-	COpusEncoder* encoder;
+	int deviceId = 0;
+	int deviceIdx = 0;
+	HRECORD recordChannel = 0;
+	COpusEncoder* encoder = nullptr;
 
 
 public:

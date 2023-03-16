@@ -1,15 +1,8 @@
 #include "CSoundOutput.h"
 #include "CVoiceException.h"
 
-CSoundOutput::CSoundOutput(int _bitRate)
-{
-	decoder = new COpusDecoder(SAMPLE_RATE, AUDIO_CHANNELS);
-}
-
-CSoundOutput::~CSoundOutput()
-{
-
-}
+CSoundOutput::CSoundOutput(int _bitRate) : decoder(new COpusDecoder(SAMPLE_RATE, AUDIO_CHANNELS)) {}
+CSoundOutput::~CSoundOutput(){}
 
 void CSoundOutput::SetVolume(float vol)
 {

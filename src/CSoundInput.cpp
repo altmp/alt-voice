@@ -3,12 +3,7 @@
 #include "CSoundInput.h"
 #include "CVoiceException.h"
 
-BOOL CALLBACK RecordCallback(HRECORD handle, const void* buffer, DWORD length, void* user);
-
-CSoundInput::CSoundInput(int _bitRate)
-{
-	encoder = new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate);
-}
+CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate)){}
 
 CSoundInput::~CSoundInput()
 {
