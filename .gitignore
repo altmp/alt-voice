@@ -9,3 +9,4 @@ build
 vsxmake*
 vs2022
 *.pdb
+install
