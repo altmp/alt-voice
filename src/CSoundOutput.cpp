@@ -2,7 +2,13 @@
 #include "CVoiceException.h"
 
 CSoundOutput::CSoundOutput(int _bitRate) : decoder(new COpusDecoder(SAMPLE_RATE, AUDIO_CHANNELS)) {}
-CSoundOutput::~CSoundOutput(){}
+CSoundOutput::~CSoundOutput()
+{
+	if (decoder)
+		delete decoder;
+
+	BASS_ChannelFree(outputStream);
+}
 
 void CSoundOutput::SetVolume(float vol)
 {
@@ -68,6 +74,9 @@ AltVoiceError CSoundOutput::SetDevice(int id)
 
 	if (!BASS_Init(deviceId, SAMPLE_RATE, 0, 0, nullptr))
 		return AltVoiceError::DeviceInit;
+
+	if (outputStream)
+		BASS_ChannelFree(outputStream);
 
 	outputStream = BASS_StreamCreate(SAMPLE_RATE, AUDIO_CHANNELS, 0, STREAMPROC_PUSH, nullptr);
 	if (!outputStream)

@@ -88,6 +88,8 @@ AltVoiceError CSoundInput::SetDevice(int id)
 		}
 	}
 
+	BASS_RecordFree();
+
 	if (!BASS_RecordInit(deviceId))
 		return AltVoiceError::DeviceInit;
 

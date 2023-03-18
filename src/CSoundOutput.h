@@ -17,8 +17,8 @@ using namespace helpers;
 class CSoundOutput : public ISoundIO
 {
 private:
-	HSTREAM outputStream;
-	COpusDecoder* decoder;
+	HSTREAM outputStream = 0;
+	COpusDecoder* decoder = nullptr;
 
 public:
 	CSoundOutput(int bitrate);
