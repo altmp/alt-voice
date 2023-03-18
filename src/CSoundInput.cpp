@@ -15,7 +15,12 @@ CSoundInput::~CSoundInput()
 
 void CSoundInput::SetVolume(float gain)
 {
-	
+	volume = gain;
+}
+
+float CSoundInput::GetVolume()
+{
+	return volume;
 }
 
 int CSoundInput::Read(void* data, size_t size)
@@ -27,6 +32,8 @@ int CSoundInput::Read(void* data, size_t size)
 	int16_t inputData[FRAME_SIZE_SAMPLES];
 	if (BASS_ChannelGetData(recordChannel, inputData, FRAME_SIZE_BYTES) != FRAME_SIZE_BYTES)
 		return 0;
+
+	GainPCM(inputData, FRAME_SIZE_SAMPLES, volume);
 
 	return encoder->EncodeShort(inputData, FRAME_SIZE_SAMPLES, data, size);
 }

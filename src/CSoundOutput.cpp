@@ -10,11 +10,6 @@ CSoundOutput::~CSoundOutput()
 	BASS_ChannelFree(outputStream);
 }
 
-void CSoundOutput::SetVolume(float vol)
-{
-
-}
-
 void CSoundOutput::Write(void* data, size_t size)
 {
 	int16_t outputBuffer[FRAME_SIZE_SAMPLES];

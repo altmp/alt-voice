@@ -21,12 +21,16 @@ class CSoundInput : public ISoundIO
 	HRECORD recordChannel = 0;
 	COpusEncoder* encoder = nullptr;
 
+	float volume = 1.f;
+
 
 public:
 	CSoundInput(int _bitRate);
 	~CSoundInput();
 
 	void SetVolume(float gain) override;
+	float GetVolume() override;
+
 	void SetStreamEnabled(bool enabled) override;
 	int Read(void* data, size_t size) override;
 

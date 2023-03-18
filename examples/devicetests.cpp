@@ -55,6 +55,7 @@ int main()
 
 	soundInput->SetDevice(2);
 	soundInput->SetStreamEnabled(true);
+	soundInput->SetVolume(0.3f);
 
 	std::thread audioThread(AudioThread);
 

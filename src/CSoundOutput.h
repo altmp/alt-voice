@@ -24,8 +24,6 @@ public:
 	CSoundOutput(int bitrate);
 	~CSoundOutput();
 
-	void SetVolume(float volume) override;
-
 	void Write(void* data, size_t size) override;
 
 	int GetNumDevices() override;

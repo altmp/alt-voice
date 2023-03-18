@@ -11,7 +11,8 @@ class ISoundIO
 public:
 	virtual ~ISoundIO() = default;
 
-	virtual void SetVolume(float vol) = 0;
+	virtual void SetVolume(float vol) {};
+	virtual float GetVolume() { return 0.f; }
 
 	virtual void Write(void* data, size_t size) {};
 	virtual int Read(void* data, size_t size) { return false; };
