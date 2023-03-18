@@ -5,40 +5,26 @@ set_project("alt-voice")
 
 set_arch("x64")
 set_languages("cxx20", "cxx2a")
+set_runtimes(is_mode("debug") and "MDd" or "MD")
 
-set_optimize("none")
-add_cxxflags("/MP /GR- /EHsc")
-
-if is_mode("debug") then
-    set_symbols("debug")
-    add_cxxflags("/Zi /Ob0 /Od")
-elseif is_mode("release") then
-    set_symbols("hidden")
-    set_strip("all")
-    add_cxxflags("/GL /Zi /O2")
-end
-
-if is_mode("debug") then
-    set_runtimes("MDd")
-else
-    set_runtimes("MD")
-end
-
-add_requires("bass", "bassmix", "libopus", "libevent", "glog", "vcpkg::evpp")
+add_requires("bass", "bassmix", "libopus")
 
 target("alt-voice")
     set_default(true)
-    set_kind("shared")
-    set_filename("alt-voice.dll")
+    set_kind("static")
+    set_prefixname("")
     add_files("src/**.cpp")
     add_headerfiles("src/**.h", "include/**.h")
     add_includedirs("src/", "include/", { public = true })
     add_packages("bass", "bassmix", "libopus")
-    add_defines("ALT_VOICE_LIB")
+    add_defines("ALT_LIB_STATIC")
     after_build(function (target)
         for pkg, pkg_details in pairs(target:pkgs()) do
-            for i, dir in ipairs(pkg_details._INFO.libfiles) do
-                os.cp(dir, path.join(target:targetdir(), dir:match("([^/\\]+)$")))
+            if os.isdir(pkg_details._INFO.installdir) then
+                os.cp(pkg_details._INFO.installdir .. "/**.so", target:targetdir())
+                os.cp(pkg_details._INFO.installdir .. "/**.dll", target:targetdir())
+                os.cp(pkg_details._INFO.installdir .. "/**.lib", target:targetdir())
+                os.cp(pkg_details._INFO.installdir .. "/**.a", target:targetdir())
             end
         end
     end)
@@ -50,5 +36,6 @@ target("devicetests")
     add_files("examples/devicetests.cpp")
     add_packages("bass", "bassmix", "libopus")
     add_deps("alt-voice")
+    add_defines("ALT_LIB_STATIC")
 
 add_rules("plugin.vsxmake.autoupdate")
