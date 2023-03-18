@@ -31,11 +31,6 @@ int CSoundInput::Read(void* data, size_t size)
 	return encoder->EncodeShort(inputData, FRAME_SIZE_SAMPLES, data, size);
 }
 
-void CSoundInput::RegisterCallback(OnVoiceCallback callback)
-{
-	cb = callback;
-}
-
 void CSoundInput::SetStreamEnabled(bool enabled)
 {
 	enabled ? BASS_ChannelPlay(recordChannel, FALSE) : BASS_ChannelPause(recordChannel);

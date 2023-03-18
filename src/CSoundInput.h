@@ -30,8 +30,6 @@ public:
 	void SetStreamEnabled(bool enabled) override;
 	int Read(void* data, size_t size) override;
 
-	void RegisterCallback(OnVoiceCallback callback) override;
-
 	int GetNumDevices() override;
 	char* GetDeviceName(int id) override;
 	AltVoiceError SetDevice(int id) override;

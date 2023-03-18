@@ -16,8 +16,6 @@ public:
 	virtual void Write(void* data, size_t size) {};
 	virtual int Read(void* data, size_t size) { return false; };
 
-	virtual void RegisterCallback(OnVoiceCallback callback) {};
-
 	virtual int GetNumDevices() = 0;
 	virtual char* GetDeviceName(int id) = 0;
 	virtual AltVoiceError SetDevice(int id) = 0;
