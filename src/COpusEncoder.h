@@ -1,4 +1,6 @@
 #pragma once
+#include <stdio.h>
+
 #include <opus/opus.h>
 #include "IOpusEncoder.h"
 
