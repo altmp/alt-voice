@@ -1,1 +1,1 @@
-xmake project -y -k vs -m "debug;release"
+xmake project -y -k vsxmake -m "debug;release"
