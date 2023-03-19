@@ -68,7 +68,10 @@ AltVoiceError CSoundOutput::SetDevice(int id)
 	}
 
 	if (!BASS_Init(deviceId, SAMPLE_RATE, 0, 0, nullptr))
-		return AltVoiceError::DeviceInit;
+	{
+		if(BASS_ErrorGetCode() != BASS_ERROR_ALREADY)
+			return AltVoiceError::DeviceInit;
+	}
 
 	if (outputStream)
 		BASS_ChannelFree(outputStream);
