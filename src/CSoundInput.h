@@ -22,7 +22,7 @@ class CSoundInput : public ISoundIO
 	COpusEncoder* encoder = nullptr;
 
 	float volume = 1.f;
-
+	int16_t micLevel = 0;
 
 public:
 	CSoundInput(int _bitRate);
@@ -33,6 +33,8 @@ public:
 
 	void SetStreamEnabled(bool enabled) override;
 	int Read(void* data, size_t size) override;
+
+	int16_t GetLevel() override;
 
 	int GetNumDevices() override;
 	char* GetDeviceName(int id) override;

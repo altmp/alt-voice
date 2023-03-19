@@ -33,10 +33,24 @@ int CSoundInput::Read(void* data, size_t size)
 	if (BASS_ChannelGetData(recordChannel, inputData, FRAME_SIZE_BYTES) != FRAME_SIZE_BYTES)
 		return 0;
 
-	if(volume != 1.f)
-		GainPCM(inputData, FRAME_SIZE_SAMPLES, volume);
+	//if(volume != 1.f)
+	//	GainPCM(inputData, FRAME_SIZE_SAMPLES, volume);
+
+	micLevel = SHRT_MIN;
+	for (int i = 0; i < FRAME_SIZE_SAMPLES; ++i)
+	{
+		inputData[i] *= volume;
+
+		if (inputData[i] > micLevel)
+			micLevel = inputData[i];
+	}
 
 	return encoder->EncodeShort(inputData, FRAME_SIZE_SAMPLES, data, size);
+}
+
+int16_t CSoundInput::GetLevel()
+{
+	return micLevel;
 }
 
 void CSoundInput::SetStreamEnabled(bool enabled)
