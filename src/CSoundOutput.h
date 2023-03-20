@@ -5,7 +5,6 @@
 #include <functional>
 
 #include <bass.h>
-#include <bassmix.h>
 
 #include "ISoundIO.h"
 #include "VoiceError.h"
@@ -28,7 +27,7 @@ public:
 
 	int GetNumDevices() override;
 	char* GetDeviceName(int id) override;
-	AltVoiceError SetDevice(int id) override;
+	AltVoiceError SelectDevice(int id) override;
 	int GetDevice() override;
 
 	void SetStreamEnabled(bool enabled) override;

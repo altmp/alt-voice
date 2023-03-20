@@ -21,7 +21,7 @@ public:
 
 	virtual int GetNumDevices() = 0;
 	virtual char* GetDeviceName(int id) = 0;
-	virtual AltVoiceError SetDevice(int id) = 0;
+	virtual AltVoiceError SelectDevice(int id) = 0;
 	virtual int GetDevice() = 0;
 
 	virtual void SetStreamEnabled(bool enabled) {};

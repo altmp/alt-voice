@@ -9,7 +9,7 @@
 AltVoiceError AV_Initialize()
 {
 	BASS_Init(0, 48000, 0, nullptr, nullptr);
-	BASS_PluginLoad("bassmix", 0);
+	BASS_FX_GetVersion();
 
 	return AltVoiceError::Ok;
 }

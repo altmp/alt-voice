@@ -5,7 +5,7 @@
 #include <functional>
 
 #include <bass.h>
-#include <bassmix.h>
+#include <bass_fx.h>
 
 #include "ISoundIO.h"
 #include "COpusEncoder.h"
@@ -16,13 +16,13 @@ using namespace helpers;
 
 class CSoundInput : public ISoundIO
 {
-	int deviceId = 0;
-	int deviceIdx = 0;
 	HRECORD recordChannel = 0;
 	COpusEncoder* encoder = nullptr;
 
 	float volume = 1.f;
 	int16_t micLevel = 0;
+
+	HFX VolumeChangeFX;
 
 public:
 	CSoundInput(int _bitRate);
@@ -38,7 +38,7 @@ public:
 
 	int GetNumDevices() override;
 	char* GetDeviceName(int id) override;
-	AltVoiceError SetDevice(int id) override;
+	AltVoiceError SelectDevice(int id) override;
 	int GetDevice() override;
 
 	OnVoiceCallback cb = nullptr;

@@ -16,6 +16,8 @@ CSoundInput::~CSoundInput()
 void CSoundInput::SetVolume(float gain)
 {
 	volume = gain;
+	const BASS_BFX_VOLUME VolumeChangeFXParams = { 0, volume };
+	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 }
 
 float CSoundInput::GetVolume()
@@ -37,13 +39,13 @@ int CSoundInput::Read(void* data, size_t size)
 	//	GainPCM(inputData, FRAME_SIZE_SAMPLES, volume);
 
 	micLevel = SHRT_MIN;
-	for (int i = 0; i < FRAME_SIZE_SAMPLES; ++i)
+	/*for (int i = 0; i < FRAME_SIZE_SAMPLES; ++i)
 	{
 		inputData[i] *= volume;
 
 		if (inputData[i] > micLevel)
 			micLevel = inputData[i];
-	}
+	}*/
 
 	return encoder->EncodeShort(inputData, FRAME_SIZE_SAMPLES, data, size);
 }
@@ -90,7 +92,7 @@ char* CSoundInput::GetDeviceName(int id)
 	return nullptr;
 }
 
-AltVoiceError CSoundInput::SetDevice(int id)
+AltVoiceError CSoundInput::SelectDevice(int id)
 {
 	int deviceId = 0;
 	BASS_DEVICEINFO deviceInfo;
@@ -111,6 +113,10 @@ AltVoiceError CSoundInput::SetDevice(int id)
 		return AltVoiceError::DeviceInit;
 
 	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, BASS_RECORD_PAUSE, nullptr, this);
+
+	VolumeChangeFX = BASS_ChannelSetFX(recordChannel, BASS_FX_BFX_VOLUME, 0);
+	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume };
+	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 	
 	if (!recordChannel)
 		return AltVoiceError::StartStream;

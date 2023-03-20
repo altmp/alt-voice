@@ -5,7 +5,6 @@
 #include <regex>
 
 #include <bass.h>
-#include <bassmix.h>
 #include <opus/opus.h>
 
 #include <alt-voice.h>
@@ -39,7 +38,7 @@ int main()
 		printf("%d: %s\n", i, soundOutput->GetDeviceName(i));
 	}
 
-	soundOutput->SetDevice(3);
+	soundOutput->SelectDevice(4);
 	soundOutput->SetStreamEnabled(true);
 
 
@@ -53,9 +52,9 @@ int main()
 		printf("%d: %s\n", i, soundInput->GetDeviceName(i));
 	}
 
-	soundInput->SetDevice(2);
+	soundInput->SetVolume(1.f);
+	soundInput->SelectDevice(1);
 	soundInput->SetStreamEnabled(true);
-	soundInput->SetVolume(0.3f);
 
 	std::thread audioThread(AudioThread);
 

@@ -53,7 +53,7 @@ char* CSoundOutput::GetDeviceName(int id)
 	return nullptr;
 }
 
-AltVoiceError CSoundOutput::SetDevice(int id)
+AltVoiceError CSoundOutput::SelectDevice(int id)
 {
 	int deviceId = 0;
 	BASS_DEVICEINFO deviceInfo;
@@ -79,6 +79,8 @@ AltVoiceError CSoundOutput::SetDevice(int id)
 	outputStream = BASS_StreamCreate(SAMPLE_RATE, AUDIO_CHANNELS, 0, STREAMPROC_PUSH, nullptr);
 	if (!outputStream)
 		return AltVoiceError::StartStream;
+
+	return AltVoiceError::Ok;
 }
 
 int CSoundOutput::GetDevice()
