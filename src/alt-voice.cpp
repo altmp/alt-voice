@@ -1,14 +1,17 @@
 #include "alt-voice.h"
 
+#include "CAudioFilter.h"
 #include "CSoundInput.h"
 #include "CSoundOutput.h"
 #include "COpusEncoder.h"
 #include "COpusDecoder.h"
 #include "CVoiceException.h"
 
+#include <bass_fx.h>
+
 AltVoiceError AV_Initialize()
 {
-	BASS_Init(0, 48000, 0, nullptr, nullptr);
+	BASS_Init(0, SAMPLE_RATE, 0, nullptr, nullptr);
 	BASS_FX_GetVersion();
 
 	return AltVoiceError::Ok;
@@ -42,12 +45,12 @@ AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundIO** soundOutput)
 	return AltVoiceError::Ok;
 }
 
-void AV_DestroySoundInput(ISoundIO* _input)
+void AV_DestroySoundInput(const ISoundIO* _input)
 {
 	delete _input;
 }
 
-const char * AV_GetVoiceErrorText(AltVoiceError error)
+const char * AV_GetVoiceErrorText(const AltVoiceError error)
 {
 	switch (error)
 	{
@@ -61,8 +64,31 @@ const char * AV_GetVoiceErrorText(AltVoiceError error)
 		return "Opus bitrate set error";
 	case AltVoiceError::OpusSignalSetError:
 		return "Opus signal set error";
+	case AltVoiceError::OpusInbandFECSetError:
+		return "Opus inband FEC set error";
+	case AltVoiceError::OpusPacketlossSetError:
+		return "Opus packetloss set error";
+	case AltVoiceError::OpusComplexitySetError:
+		return "Opus complexity set error";
+	case AltVoiceError::OpusPredictionSetError:
+		return "Opus prediction set error";
+	case AltVoiceError::OpusLSBDepthSetError:
+		return "Opus LSB depth set error";
+	case AltVoiceError::OpusForceSetError:
+		return "Opus force set error";
+	case AltVoiceError::OpusDTXSetError:
+		return "Opus DTX set error";
+	case AltVoiceError::DeviceInit:
+		return "Device init error";
+	case AltVoiceError::StartStream:
+		return "Start stream error";
+	case AltVoiceError::MissingDevice:
+		return "Missing device error";
+	case AltVoiceError::FilterCreateError:
+		return "Filter create error";
+	default:
+		return "Unknown error";
 	}
-	return "Unknown error";
 }
 
 ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(int sampleRate, int channelsCount, IOpusEncoder** opusEncoder, int bitRate)
@@ -93,14 +119,31 @@ ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(int sampleRate, int channelsCou
 	}
 }
 
-ALT_VOICE_API void AV_DestroyOpusEncoder(IOpusEncoder* opusEncoder)
+ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(int sampleRate, int channelsCount, int flags, IAudioFilter** audioFilter)
 {
-	if (opusEncoder)
-		delete opusEncoder;
+	try
+	{
+		IAudioFilter* filter = new CAudioFilter(sampleRate, channelsCount, flags);
+		*audioFilter = filter;
+		return AltVoiceError::Ok;
+	}
+	catch (const CVoiceException& e)
+	{
+		return e.GetCode();
+	}
 }
 
-ALT_VOICE_API void AV_DestroyOpusDecoder(IOpusDecoder* opusDecoder)
+ALT_VOICE_API void AV_DestroyOpusEncoder(const IOpusEncoder* opusEncoder)
 {
-	if (opusDecoder)
-		delete opusDecoder;
+	delete opusEncoder;
+}
+
+ALT_VOICE_API void AV_DestroyOpusDecoder(const IOpusDecoder* opusDecoder)
+{
+	delete opusDecoder;
+}
+
+ALT_VOICE_API void AV_DestroyAudioFilter(const IAudioFilter* audioFilter)
+{
+	delete audioFilter;
 }

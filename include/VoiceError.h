@@ -18,5 +18,6 @@ enum class AltVoiceError
 
 	DeviceInit,
 	StartStream,
-	MissingDevice
+	MissingDevice,
+	FilterCreateError,
 };

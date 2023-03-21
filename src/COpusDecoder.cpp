@@ -17,7 +17,7 @@ COpusDecoder::~COpusDecoder()
 
 int COpusDecoder::DecodeShort(void* opusData, size_t size, void* pcmData, size_t outputSize, bool fec, bool missing)
 {
-	int frame_size = 0;
+	int frame_size;
 	
 	if (!missing)
 	{

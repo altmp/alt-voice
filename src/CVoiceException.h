@@ -1,7 +1,8 @@
 #pragma once
 #include "VoiceError.h"
+#include <exception>
 
-class CVoiceException
+class CVoiceException: std::exception
 {
 	AltVoiceError _exception;
 public:

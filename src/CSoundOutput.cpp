@@ -1,19 +1,22 @@
 #include "CSoundOutput.h"
+
+#include "alt-voice.h"
 #include "CVoiceException.h"
 
 CSoundOutput::CSoundOutput(int _bitRate) : decoder(new COpusDecoder(SAMPLE_RATE, AUDIO_CHANNELS)) {}
 CSoundOutput::~CSoundOutput()
 {
-	if (decoder)
-		delete decoder;
+	delete decoder;
 
 	BASS_ChannelFree(outputStream);
 }
 
-void CSoundOutput::Write(void* data, size_t size)
+void CSoundOutput::Write(void* data, size_t size, OnVoiceCallback filterCallback)
 {
 	int16_t outputBuffer[FRAME_SIZE_SAMPLES];
 	int len = decoder->DecodeShort(data, size, outputBuffer, FRAME_SIZE_SAMPLES, true, false);
+
+	filterCallback(outputBuffer, FRAME_SIZE_BYTES);
 
 	BASS_StreamPutData(outputStream, outputBuffer, FRAME_SIZE_BYTES);
 }

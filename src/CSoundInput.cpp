@@ -1,7 +1,10 @@
 #include <chrono>
 #include <fstream>
 #include "CSoundInput.h"
-#include "CVoiceException.h"
+#include <bass_fx.h>
+
+#include "alt-voice.h"
+
 
 CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate)){}
 
@@ -27,7 +30,7 @@ float CSoundInput::GetVolume()
 
 int CSoundInput::Read(void* data, size_t size)
 {
-	int available = BASS_ChannelGetData(recordChannel, nullptr, BASS_DATA_AVAILABLE);
+	const int available = BASS_ChannelGetData(recordChannel, nullptr, BASS_DATA_AVAILABLE);
 	if (available < FRAME_SIZE_BYTES) 
 		return 0;
 
@@ -35,22 +38,16 @@ int CSoundInput::Read(void* data, size_t size)
 	if (BASS_ChannelGetData(recordChannel, inputData, FRAME_SIZE_BYTES) != FRAME_SIZE_BYTES)
 		return 0;
 
-	//if(volume != 1.f)
-	//	GainPCM(inputData, FRAME_SIZE_SAMPLES, volume);
 
-	micLevel = SHRT_MIN;
-	/*for (int i = 0; i < FRAME_SIZE_SAMPLES; ++i)
-	{
-		inputData[i] *= volume;
-
-		if (inputData[i] > micLevel)
-			micLevel = inputData[i];
-	}*/
+	const DWORD currentMicLevel = BASS_ChannelGetLevel(recordChannel);
+	
+	const uint16_t leftChannelLevel = LOWORD(currentMicLevel);
+	micLevel = leftChannelLevel / (1 << 15);
 
 	return encoder->EncodeShort(inputData, FRAME_SIZE_SAMPLES, data, size);
 }
 
-int16_t CSoundInput::GetLevel()
+float CSoundInput::GetLevel()
 {
 	return micLevel;
 }

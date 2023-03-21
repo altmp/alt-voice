@@ -6,6 +6,7 @@ set_project("alt-voice")
 set_arch("x64")
 set_languages("cxx20", "cxx2a")
 set_runtimes(is_mode("debug") and "MDd" or "MD")
+set_symbols("debug")
 
 add_requires("bass", "bass-fx", "libopus")
 

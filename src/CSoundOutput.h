@@ -1,17 +1,10 @@
 #pragma once
-#include <thread>
-#include <mutex>
-#include <atomic>
-#include <functional>
-
 #include <bass.h>
 
+#include "alt-voice.h"
 #include "ISoundIO.h"
 #include "VoiceError.h"
 #include "COpusDecoder.h"
-
-#include "helpers.h"
-using namespace helpers;
 
 class CSoundOutput : public ISoundIO
 {
@@ -23,7 +16,7 @@ public:
 	CSoundOutput(int bitrate);
 	~CSoundOutput();
 
-	void Write(void* data, size_t size) override;
+	void Write(void* data, size_t size, OnVoiceCallback filterCallback = nullptr) override;
 
 	int GetNumDevices() override;
 	char* GetDeviceName(int id) override;

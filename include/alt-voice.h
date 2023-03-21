@@ -6,6 +6,13 @@
 #include <vector>
 #include <string>
 
+#include "IAudioFilter.h"
+
+constexpr int SAMPLE_RATE = 48000;
+constexpr int AUDIO_CHANNELS = 1;
+constexpr int FRAME_SIZE_SAMPLES = SAMPLE_RATE / 10;
+constexpr int FRAME_SIZE_BYTES = FRAME_SIZE_SAMPLES * sizeof(int16_t);
+
 #ifndef ALT_VOICE_API
     #if defined(ALT_LIB_STATIC)
         #define ALT_VOICE_API
@@ -23,6 +30,7 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
 ALT_VOICE_API AltVoiceError AV_Initialize();
 ALT_VOICE_API AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundIO** soundOutput);
 ALT_VOICE_API AltVoiceError AV_CreateSoundInput(int bitrate, ISoundIO** soundInput);
@@ -32,6 +40,8 @@ ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(int sampleRate, int channelsCou
 ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(int sampleRate, int channelsCount, IOpusDecoder** opusDecoder);
 ALT_VOICE_API void AV_DestroyOpusEncoder(IOpusEncoder* opusEncoder);
 ALT_VOICE_API void AV_DestroyOpusDecoder(IOpusDecoder* opusDecoder);
+ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(int sampleRate, int channelsCount, int flags, IAudioFilter** audioFilter);
+ALT_VOICE_API void AV_DestroyAudioFilter(IAudioFilter* audioFilter);
 
 #if defined(__cplusplus)
 }
