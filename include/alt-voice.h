@@ -14,7 +14,7 @@ constexpr int FRAME_SIZE_BYTES = FRAME_SIZE_SAMPLES * sizeof(int16_t);
 AltVoiceError AV_Initialize();
 AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundIO** soundOutput);
 AltVoiceError AV_CreateSoundInput(int bitrate, ISoundIO** soundInput);
-void AV_DestroySoundInput(const ISoundIO* input);
+void AV_DestroySoundInput(const ISoundIO* _input);
 const char* AV_GetVoiceErrorText(AltVoiceError error);
 AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int bitRate);
 AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder);
