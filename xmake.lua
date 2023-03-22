@@ -18,7 +18,6 @@ target("alt-voice")
     add_headerfiles("src/**.h", "include/**.h")
     add_includedirs("src/", "include/", { public = true })
     add_packages("bass", "bass-fx", "libopus", "rnnoise")
-    add_defines("ALT_LIB_STATIC")
     after_build(function (target)
         for pkg, pkg_details in pairs(target:pkgs()) do
             if os.isdir(pkg_details._INFO.installdir) then
@@ -36,6 +35,5 @@ target("devicetests")
     add_files("examples/devicetests.cpp")
     add_packages("bass", "bass-fx", "libopus")
     add_deps("alt-voice")
-    add_defines("ALT_LIB_STATIC")
 
 add_rules("plugin.vsxmake.autoupdate")

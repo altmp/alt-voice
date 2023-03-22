@@ -33,7 +33,19 @@ jobs:
           mkdir upload\lib\debug
           mkdir upload\include
           copy build\windows\x64\release\alt-voice.lib upload\lib\release
+          copy build\windows\x64\release\opus.lib upload\lib\release
+          copy build\windows\x64\release\rnnoise.lib upload\lib\release
+          copy build\windows\x64\release\bass.lib upload\lib\release
+          copy build\windows\x64\release\bass_fx.lib upload\lib\release
           copy build\windows\x64\debug\alt-voice.lib upload\lib\debug
+          copy build\windows\x64\debug\opus.lib upload\lib\debug
+          copy build\windows\x64\debug\rnnoise.lib upload\lib\debug
+          copy build\windows\x64\debug\bass.lib upload\lib\debug
+          copy build\windows\x64\debug\bass_fx.lib upload\lib\debug
+          copy build\windows\x64\release\bass_fx.dll upload\bin\release
+          copy build\windows\x64\release\bass.dll upload\bin\release
+          copy build\windows\x64\debug\bass_fx.dll upload\bin\debug
+          copy build\windows\x64\debug\bass.dll upload\bin\debug
           copy include\alt-voice.h upload\include
           copy include\IAudioFilter.h upload\include
           copy include\IOpusDecoder.h upload\include

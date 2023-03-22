@@ -91,7 +91,7 @@ const char * AV_GetVoiceErrorText(const AltVoiceError error)
 	}
 }
 
-ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int bitRate)
+AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int bitRate)
 {
 	try
 	{
@@ -105,7 +105,7 @@ ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int
 	}
 }
 
-ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder)
+AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder)
 {
 	try
 	{
@@ -119,7 +119,7 @@ ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder)
 	}
 }
 
-ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter)
+AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter)
 {
 	try
 	{
@@ -133,17 +133,17 @@ ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter)
 	}
 }
 
-ALT_VOICE_API void AV_DestroyOpusEncoder(const IOpusEncoder* opusEncoder)
+void AV_DestroyOpusEncoder(const IOpusEncoder* opusEncoder)
 {
 	delete opusEncoder;
 }
 
-ALT_VOICE_API void AV_DestroyOpusDecoder(const IOpusDecoder* opusDecoder)
+void AV_DestroyOpusDecoder(const IOpusDecoder* opusDecoder)
 {
 	delete opusDecoder;
 }
 
-ALT_VOICE_API void AV_DestroyAudioFilter(const IAudioFilter* audioFilter)
+void AV_DestroyAudioFilter(const IAudioFilter* audioFilter)
 {
 	delete audioFilter;
 }
