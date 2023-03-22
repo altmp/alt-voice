@@ -1,0 +1,150 @@
+name: Build and github release
+on:
+  push:
+
+jobs:
+  build-windows:
+    name: Build windows release and debug
+    runs-on: windows-2019
+    steps:
+      - name: Install XMake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build
+        shell: cmd
+        run: |
+          xmake config -m release -k vsxmake -y
+          xmake build
+          xmake config -m debug -k vsxmake -y
+          xmake build
+
+      - name: Copy files
+        shell: cmd
+        run: |
+          mkdir upload
+          mkdir upload\lib\release
+          mkdir upload\lib\debug
+          mkdir upload\include
+          copy build\windows\x64\release\alt-voice.lib upload\lib\release
+          copy build\windows\x64\debug\alt-voice.lib upload\lib\debug
+          copy include\alt-voice.h upload\include
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: alt-voice-windows
+          path: ./upload/
+
+  # build-linux:
+  #   name: Build linux release
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Install XMake
+  #       uses: xmake-io/github-action-setup-xmake@v1
+  #       with:
+  #         xmake-version: latest
+
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+
+  #     - name: Build
+  #       run: |
+  #         xmake config -m release -y
+  #         xmake build
+
+  #     - name: Copy files
+  #       run: |
+  #         mkdir -p upload
+  #         mkdir -p upload/lib
+  #         mkdir -p upload/include
+  #         cp ./build/linux/x64/release/alt-voice.a ./upload/lib
+  #         cp ./include/alt-voice.h ./upload/include
+
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: alt-voice-linux
+  #         path: ./upload/
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-20.04
+    # needs: [build-linux, build-windows]
+    needs: [build-windows]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Download windows artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: alt-voice-windows
+          path: dist-windows
+
+      # - name: Download linux artifacts
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: alt-voice-linux
+      #     path: dist-linux
+
+      - name: Zip artifacts
+        run: |
+          zip -r alt-voice-windows dist-windows/*
+      # zip -r alt-voice-linux dist-linux/*
+
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Check outputs
+        run: echo ${{ steps.vars.outputs.sha_short }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.vars.outputs.sha_short }}
+          release_name: Release @${{ steps.vars.outputs.sha_short }}
+
+      - name: Upload windows artifacts
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./alt-voice-windows.zip
+          asset_name: alt-voice-windows.zip
+          asset_content_type: application/zip
+
+      # - name: Upload linux artifacts
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./alt-voice-linux.zip
+      #     asset_name: alt-voice-linux.zip
+      #     asset_content_type: application/zip
+
+  delete-artifacts:
+    name: Delete artifacts
+    runs-on: ubuntu-20.04
+    needs: [ create-release ]
+    if: ${{ always() }}
+    steps:
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: |
+            alt-voice-windows
+    # alt-voice-linux

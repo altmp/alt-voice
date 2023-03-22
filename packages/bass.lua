@@ -17,5 +17,5 @@ package("bass")
 
     on_install("linux", function (package)
         os.cp("libs/x86_64/libbass.so", package:installdir("bin"))
-        os.cp("bass.h", package:installdir("include"))
+        os.cp("c/bass.h", package:installdir("include"))
     end)
