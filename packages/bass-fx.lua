@@ -10,12 +10,12 @@ package("bass-fx")
     end
 
     on_install("windows", function (package)
-        os.cp("c/x64/bass_fx.lib", package:installdir("lib"))
+        os.cp("C/x64/bass_fx.lib", package:installdir("lib"))
         os.cp("x64/bass_fx.dll", package:installdir("bin"))
-        os.cp("c/bass_fx.h", package:installdir("include"))
+        os.cp("C/bass_fx.h", package:installdir("include"))
     end)
 
     on_install("linux", function (package)
         os.cp("libs/x86_64/libbass_fx.so", package:installdir("bin"))
-        os.cp("c/bass_fx.h", package:installdir("include"))
+        os.cp("C/bass_fx.h", package:installdir("include"))
     end)
