@@ -31,6 +31,8 @@ jobs:
           mkdir upload
           mkdir upload\lib\release
           mkdir upload\lib\debug
+          mkdir upload\bin\debug
+          mkdir upload\bin\release
           mkdir upload\include
           copy build\windows\x64\release\alt-voice.lib upload\lib\release
           copy build\windows\x64\release\opus.lib upload\lib\release
