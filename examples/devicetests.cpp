@@ -38,7 +38,7 @@ int main()
 		printf("%d: %s\n", i, soundOutput->GetDeviceName(i));
 	}
 
-	soundOutput->SelectDevice(4);
+	soundOutput->SelectDevice(-1);
 	soundOutput->SetStreamEnabled(true);
 
 
@@ -52,11 +52,11 @@ int main()
 		printf("%d: %s\n", i, soundInput->GetDeviceName(i));
 	}
 
+	soundInput->RegisterCallback(AudioThread);
 	soundInput->SetVolume(1.0f);
-	soundInput->SelectDevice(2);
+	soundInput->SelectDevice(-1);
 	soundInput->SetStreamEnabled(true);
 	soundInput->SetNoiseSuppressionEnabled(true);
-	soundInput->RegisterCallback(AudioThread);
 
 	for(;;)
 	{

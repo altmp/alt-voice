@@ -8,7 +8,7 @@
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int AUDIO_CHANNELS = 1;
-constexpr int FRAME_SIZE_SAMPLES = SAMPLE_RATE / 10;
+constexpr int FRAME_SIZE_SAMPLES = SAMPLE_RATE / 50;
 constexpr int FRAME_SIZE_BYTES = FRAME_SIZE_SAMPLES * sizeof(int16_t);
 
 AltVoiceError AV_Initialize();

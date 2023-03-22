@@ -82,7 +82,7 @@ char* CSoundInput::GetDeviceName(int id)
 
 AltVoiceError CSoundInput::SelectDevice(int id)
 {
-	int deviceId = 0;
+	int deviceId = -1;
 	BASS_DEVICEINFO deviceInfo;
 	for (int i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
