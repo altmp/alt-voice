@@ -91,11 +91,11 @@ const char * AV_GetVoiceErrorText(const AltVoiceError error)
 	}
 }
 
-ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(int sampleRate, int channelsCount, IOpusEncoder** opusEncoder, int bitRate)
+ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int bitRate)
 {
 	try
 	{
-		IOpusEncoder* encoder = new COpusEncoder(sampleRate, channelsCount, bitRate);
+		IOpusEncoder* encoder = new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, bitRate);
 		*opusEncoder = encoder;
 		return AltVoiceError::Ok;
 	}
@@ -105,11 +105,11 @@ ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(int sampleRate, int channelsCou
 	}
 }
 
-ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(int sampleRate, int channelsCount, IOpusDecoder** opusDecoder)
+ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder)
 {
 	try
 	{
-		IOpusDecoder* decoder = new COpusDecoder(sampleRate, channelsCount);
+		IOpusDecoder* decoder = new COpusDecoder(SAMPLE_RATE, AUDIO_CHANNELS);
 		*opusDecoder = decoder;
 		return AltVoiceError::Ok;
 	}
@@ -119,11 +119,11 @@ ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(int sampleRate, int channelsCou
 	}
 }
 
-ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(int sampleRate, int channelsCount, int flags, IAudioFilter** audioFilter)
+ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter)
 {
 	try
 	{
-		IAudioFilter* filter = new CAudioFilter(sampleRate, channelsCount, flags);
+		IAudioFilter* filter = new CAudioFilter(SAMPLE_RATE, AUDIO_CHANNELS, 0);
 		*audioFilter = filter;
 		return AltVoiceError::Ok;
 	}

@@ -3,8 +3,6 @@
 #include "IOpusEncoder.h"
 #include "IOpusDecoder.h"
 #include "VoiceError.h"
-#include <vector>
-#include <string>
 
 #include "IAudioFilter.h"
 
@@ -36,11 +34,11 @@ ALT_VOICE_API AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundIO** soundOu
 ALT_VOICE_API AltVoiceError AV_CreateSoundInput(int bitrate, ISoundIO** soundInput);
 ALT_VOICE_API void AV_DestroySoundInput(ISoundIO* input);
 ALT_VOICE_API const char* AV_GetVoiceErrorText(AltVoiceError error);
-ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(int sampleRate, int channelsCount, IOpusEncoder** opusEncoder, int bitRate);
-ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(int sampleRate, int channelsCount, IOpusDecoder** opusDecoder);
+ALT_VOICE_API AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int bitRate);
+ALT_VOICE_API AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder);
 ALT_VOICE_API void AV_DestroyOpusEncoder(IOpusEncoder* opusEncoder);
 ALT_VOICE_API void AV_DestroyOpusDecoder(IOpusDecoder* opusDecoder);
-ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(int sampleRate, int channelsCount, int flags, IAudioFilter** audioFilter);
+ALT_VOICE_API AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter);
 ALT_VOICE_API void AV_DestroyAudioFilter(IAudioFilter* audioFilter);
 
 #if defined(__cplusplus)

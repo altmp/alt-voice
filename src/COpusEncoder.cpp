@@ -18,7 +18,7 @@ COpusEncoder::COpusEncoder(int sampleRate, int channels, int bitRate)
 	if (opus_encoder_ctl(encoder, OPUS_SET_INBAND_FEC(1)) != OPUS_OK)
 		throw CVoiceException(AltVoiceError::OpusInbandFECSetError);
 
-	if (opus_encoder_ctl(encoder, OPUS_SET_PACKET_LOSS_PERC(10)) != OPUS_OK)
+	if (opus_encoder_ctl(encoder, OPUS_SET_PACKET_LOSS_PERC(15)) != OPUS_OK)
 		throw CVoiceException(AltVoiceError::OpusPacketlossSetError);
 
 	if (opus_encoder_ctl(encoder, OPUS_SET_COMPLEXITY(10)) != OPUS_OK)

@@ -17,7 +17,7 @@ public:
 	virtual void Write(void* data, size_t size, OnVoiceCallback filterCallback = nullptr) {}
 	virtual int Read(void* data, size_t size) { return false; }
 
-	virtual float GetLevel() { return 0; }
+	virtual float GetLevel() { return 0.f; }
 
 	virtual int GetNumDevices() = 0;
 	virtual char* GetDeviceName(int id) = 0;
@@ -25,4 +25,5 @@ public:
 	virtual int GetDevice() = 0;
 
 	virtual void SetStreamEnabled(bool enabled) {}
+	virtual void SetNoiseSuppressionEnabled(const bool enabled) {}
 };

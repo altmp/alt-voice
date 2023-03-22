@@ -4,15 +4,18 @@
 #include <bass_fx.h>
 
 #include "alt-voice.h"
+#include <iostream>
 
 
-CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate)){}
+CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate))
+{
+	denoiser = rnnoise_create(nullptr);
+}
 
 CSoundInput::~CSoundInput()
 {
-	if (encoder)
-		delete encoder;
-
+	delete encoder;
+	rnnoise_destroy(denoiser);
 	BASS_RecordFree();
 }
 
@@ -38,11 +41,12 @@ int CSoundInput::Read(void* data, size_t size)
 	if (BASS_ChannelGetData(recordChannel, inputData, FRAME_SIZE_BYTES) != FRAME_SIZE_BYTES)
 		return 0;
 
+	NoiseSuppressionProcess(inputData, FRAME_SIZE_SAMPLES);
 
 	const DWORD currentMicLevel = BASS_ChannelGetLevel(recordChannel);
 	
 	const uint16_t leftChannelLevel = LOWORD(currentMicLevel);
-	micLevel = leftChannelLevel / (1 << 15);
+	micLevel = static_cast<float>(leftChannelLevel) / MaxShortFloatValue;
 
 	return encoder->EncodeShort(inputData, FRAME_SIZE_SAMPLES, data, size);
 }
@@ -109,8 +113,9 @@ AltVoiceError CSoundInput::SelectDevice(int id)
 	if (!BASS_RecordInit(deviceId))
 		return AltVoiceError::DeviceInit;
 
-	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, BASS_RECORD_PAUSE, nullptr, this);
+	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, nullptr, this);
 
+	// Change input volume
 	VolumeChangeFX = BASS_ChannelSetFX(recordChannel, BASS_FX_BFX_VOLUME, 0);
 	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume };
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
@@ -124,4 +129,35 @@ AltVoiceError CSoundInput::SelectDevice(int id)
 int CSoundInput::GetDevice()
 {
 	return BASS_RecordGetDevice();
+}
+
+void CSoundInput::SetNoiseSuppressionEnabled(const bool enabled)
+{
+	noiseSuppressionEnabled = enabled;
+}
+
+void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
+{
+	if (noiseSuppressionEnabled)
+	{
+		const auto shortSamples = static_cast<short*>(buffer);
+
+		// Convert the 16-bit integer samples to floating-point samples
+		for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
+		{
+			floatBuffer[i] = static_cast<float>(shortSamples[i]) / MaxShortFloatValue;
+		}
+
+		// Pass the floating-point samples to the RNNoise function
+		for (int i = 0; i < FRAME_SIZE_SAMPLES; i += RNNoiseFrameSize)
+		{
+			rnnoise_process_frame(denoiser, floatBuffer + i, floatBuffer + i);
+		}
+
+		// Convert the floating-point samples back to 16-bit integer samples
+		for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
+		{
+			shortSamples[i] = static_cast<int16_t>(floatBuffer[i] * MaxShortFloatValue);
+		}
+	}
 }

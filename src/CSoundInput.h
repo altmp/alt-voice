@@ -1,19 +1,28 @@
 #pragma once
 #include <bass.h>
+#include <rnnoise.h>
 
+#include "alt-voice.h"
 #include "ISoundIO.h"
 #include "COpusEncoder.h"
 #include "VoiceError.h"
 
 class CSoundInput : public ISoundIO
 {
+	static constexpr int RNNoiseFrameSize = 480;
+	static constexpr float MaxShortFloatValue = 32768.0f;
+
 	HRECORD recordChannel = 0;
 	COpusEncoder* encoder = nullptr;
 
 	float volume = 1.f;
 	float micLevel = 0;
+	bool noiseSuppressionEnabled = false;
 
 	HFX VolumeChangeFX;
+	DenoiseState* denoiser;
+
+	float floatBuffer[FRAME_SIZE_SAMPLES];
 
 public:
 	CSoundInput(int _bitRate);
@@ -32,6 +41,8 @@ public:
 	AltVoiceError SelectDevice(int id) override;
 	int GetDevice() override;
 
-	OnVoiceCallback cb = nullptr;
+	void SetNoiseSuppressionEnabled(const bool enabled) override;
+
+	void NoiseSuppressionProcess(void* buffer, DWORD length);
 };
 

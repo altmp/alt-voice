@@ -8,7 +8,7 @@ set_languages("cxx20", "cxx2a")
 set_runtimes(is_mode("debug") and "MDd" or "MD")
 set_symbols("debug")
 
-add_requires("bass", "bass-fx", "libopus")
+add_requires("bass", "bass-fx", "libopus", "rnnoise f75e7dd")
 
 target("alt-voice")
     set_default(true)
@@ -17,7 +17,7 @@ target("alt-voice")
     add_files("src/**.cpp")
     add_headerfiles("src/**.h", "include/**.h")
     add_includedirs("src/", "include/", { public = true })
-    add_packages("bass", "bass-fx", "libopus")
+    add_packages("bass", "bass-fx", "libopus", "rnnoise")
     add_defines("ALT_LIB_STATIC")
     after_build(function (target)
         for pkg, pkg_details in pairs(target:pkgs()) do
