@@ -41,42 +41,43 @@ jobs:
           name: alt-voice-windows
           path: ./upload/
 
-  build-linux:
-    name: Build linux release
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Install XMake
-        uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
+  # build-linux:
+  #   name: Build linux release
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Install XMake
+  #       uses: xmake-io/github-action-setup-xmake@v1
+  #       with:
+  #         xmake-version: latest
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
 
-      - name: Build
-        run: |
-          xmake config -m release -y
-          xmake build
+  #     - name: Build
+  #       run: |
+  #         xmake config -m release -y
+  #         xmake build
 
-      - name: Copy files
-        run: |
-          mkdir -p upload
-          mkdir -p upload/lib
-          mkdir -p upload/include
-          cp ./build/linux/x64/release/alt-voice.a ./upload/lib
-          cp ./include/alt-voice.h ./upload/include
+  #     - name: Copy files
+  #       run: |
+  #         mkdir -p upload
+  #         mkdir -p upload/lib
+  #         mkdir -p upload/include
+  #         cp ./build/linux/x64/release/alt-voice.a ./upload/lib
+  #         cp ./include/alt-voice.h ./upload/include
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: alt-voice-linux
-          path: ./upload/
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: alt-voice-linux
+  #         path: ./upload/
 
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-20.04
-    needs: [build-linux, build-windows]
+    # needs: [build-linux, build-windows]
+    needs: [build-windows]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -88,16 +89,16 @@ jobs:
           name: alt-voice-windows
           path: dist-windows
 
-      - name: Download linux artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: alt-voice-linux
-          path: dist-linux
+      # - name: Download linux artifacts
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: alt-voice-linux
+      #     path: dist-linux
 
       - name: Zip artifacts
         run: |
           zip -r alt-voice-windows dist-windows/*
-          zip -r alt-voice-linux dist-linux/*
+      # zip -r alt-voice-linux dist-linux/*
 
       - name: Set outputs
         id: vars
@@ -125,15 +126,15 @@ jobs:
           asset_name: alt-voice-windows.zip
           asset_content_type: application/zip
 
-      - name: Upload linux artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./alt-voice-linux.zip
-          asset_name: alt-voice-linux.zip
-          asset_content_type: application/zip
+      # - name: Upload linux artifacts
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./alt-voice-linux.zip
+      #     asset_name: alt-voice-linux.zip
+      #     asset_content_type: application/zip
 
   delete-artifacts:
     name: Delete artifacts
@@ -145,5 +146,5 @@ jobs:
         uses: geekyeggo/delete-artifact@v2
         with:
           name: |
-            alt-voice-linux
             alt-voice-windows
+    # alt-voice-linux
