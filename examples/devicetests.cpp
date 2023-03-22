@@ -13,19 +13,9 @@ void ApplyFilter(void* buffer, uint32_t length)
 	RadioFilter->Process(buffer, length);
 }
 
-void AudioThread()
+void AudioThread(void* buffer, uint32_t size)
 {
-	for(;;)
-	{
-		if (soundInput)
-		{
-			int16_t buffer[FRAME_SIZE_BYTES / 10];
-			if (const auto len = soundInput->Read(buffer, FRAME_SIZE_BYTES / 10))
-			{
-				soundOutput->Write(buffer, len, ApplyFilter);
-			}
-		}
-	}
+	soundOutput->Write(buffer, size, ApplyFilter);
 }
 
 int main()
@@ -34,9 +24,9 @@ int main()
 
 	AltVoiceError filterCreateError = AV_CreateAudioFilter(&RadioFilter);
 
-	/*auto bqLowEffect = RadioFilter->ApplyBqfEffect(0, 1400, 0, 0.86f, 0, 0, 1);
+	auto bqLowEffect = RadioFilter->ApplyBqfEffect(0, 1400, 0, 0.86f, 0, 0, 1);
 	auto bqHighEffect = RadioFilter->ApplyBqfEffect(1, 900, 0, 0.83f, 0, 0, 2);
-	auto distortionEffect = RadioFilter->ApplyDistortionEffect(0.0f, -2.95f, -0.05f, -0.18f, 1.f, 3);*/
+	auto distortionEffect = RadioFilter->ApplyDistortionEffect(0.0f, -2.95f, -0.05f, -0.18f, 1.f, 3);
 
 	AV_CreateSoundOutput(64000, &soundOutput);
 
@@ -62,11 +52,14 @@ int main()
 		printf("%d: %s\n", i, soundInput->GetDeviceName(i));
 	}
 
-	soundInput->SetVolume(1.f);
+	soundInput->SetVolume(1.0f);
 	soundInput->SelectDevice(2);
 	soundInput->SetStreamEnabled(true);
 	soundInput->SetNoiseSuppressionEnabled(true);
+	soundInput->RegisterCallback(AudioThread);
 
-	std::thread audioThread(AudioThread);
-	audioThread.join();
+	for(;;)
+	{
+		Sleep(1000);
+	}
 }

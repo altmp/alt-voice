@@ -16,7 +16,10 @@ void CSoundOutput::Write(void* data, size_t size, OnVoiceCallback filterCallback
 	int16_t outputBuffer[FRAME_SIZE_SAMPLES];
 	int len = decoder->DecodeShort(data, size, outputBuffer, FRAME_SIZE_SAMPLES, true, false);
 
-	filterCallback(outputBuffer, FRAME_SIZE_BYTES);
+	if (filterCallback)
+	{
+		filterCallback(outputBuffer, FRAME_SIZE_BYTES);
+	}
 
 	BASS_StreamPutData(outputStream, outputBuffer, FRAME_SIZE_BYTES);
 }
@@ -70,7 +73,7 @@ AltVoiceError CSoundOutput::SelectDevice(int id)
 		}
 	}
 
-	if (!BASS_Init(deviceId, SAMPLE_RATE, 0, 0, nullptr))
+	if (!BASS_Init(deviceId, SAMPLE_RATE, 0, nullptr, nullptr))
 	{
 		if(BASS_ErrorGetCode() != BASS_ERROR_ALREADY)
 			return AltVoiceError::DeviceInit;
