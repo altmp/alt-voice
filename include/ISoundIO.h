@@ -24,6 +24,8 @@ public:
 	virtual AltVoiceError SelectDevice(int id) = 0;
 	virtual int GetDevice() = 0;
 
+	virtual void RegisterCallback(OnVoiceCallback callback) {}
+
 	virtual void SetStreamEnabled(bool enabled) {}
 	virtual void SetNoiseSuppressionEnabled(const bool enabled) {}
 };

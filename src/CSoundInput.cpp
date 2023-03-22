@@ -7,14 +7,16 @@
 #include <iostream>
 
 
-CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate))
+CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate)), bitrate(_bitRate)
 {
 	denoiser = rnnoise_create(nullptr);
+	opusBuffer = new char[bitrate];
 }
 
 CSoundInput::~CSoundInput()
 {
 	delete encoder;
+	delete opusBuffer;
 	rnnoise_destroy(denoiser);
 	BASS_RecordFree();
 }
@@ -33,22 +35,7 @@ float CSoundInput::GetVolume()
 
 int CSoundInput::Read(void* data, size_t size)
 {
-	const int available = BASS_ChannelGetData(recordChannel, nullptr, BASS_DATA_AVAILABLE);
-	if (available < FRAME_SIZE_BYTES) 
-		return 0;
-
-	int16_t inputData[FRAME_SIZE_SAMPLES];
-	if (BASS_ChannelGetData(recordChannel, inputData, FRAME_SIZE_BYTES) != FRAME_SIZE_BYTES)
-		return 0;
-
-	NoiseSuppressionProcess(inputData, FRAME_SIZE_SAMPLES);
-
-	const DWORD currentMicLevel = BASS_ChannelGetLevel(recordChannel);
-	
-	const uint16_t leftChannelLevel = LOWORD(currentMicLevel);
-	micLevel = static_cast<float>(leftChannelLevel) / MaxShortFloatValue;
-
-	return encoder->EncodeShort(inputData, FRAME_SIZE_SAMPLES, data, size);
+	return 0;
 }
 
 float CSoundInput::GetLevel()
@@ -113,7 +100,8 @@ AltVoiceError CSoundInput::SelectDevice(int id)
 	if (!BASS_RecordInit(deviceId))
 		return AltVoiceError::DeviceInit;
 
-	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, nullptr, this);
+	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, OnSoundFrame, this);
+	BASS_ChannelSetAttribute(recordChannel, BASS_ATTRIB_GRANULE, FRAME_SIZE_SAMPLES);
 
 	// Change input volume
 	VolumeChangeFX = BASS_ChannelSetFX(recordChannel, BASS_FX_BFX_VOLUME, 0);
@@ -131,9 +119,25 @@ int CSoundInput::GetDevice()
 	return BASS_RecordGetDevice();
 }
 
+void CSoundInput::RegisterCallback(OnVoiceCallback callback)
+{
+	VoiceCallback = callback;
+}
+
 void CSoundInput::SetNoiseSuppressionEnabled(const bool enabled)
 {
 	noiseSuppressionEnabled = enabled;
+}
+
+BOOL CSoundInput::OnSoundFrame(HRECORD handle, const void* buffer, DWORD length, void* user)
+{
+	const auto self = static_cast<CSoundInput*>(user);
+
+	for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
+	{
+		self->SoundFrameCaptured(handle, (char*)buffer + i, FRAME_SIZE_SAMPLES * sizeof(short));
+	}
+	return true;
 }
 
 void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
@@ -159,5 +163,29 @@ void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
 		{
 			shortSamples[i] = static_cast<int16_t>(floatBuffer[i] * MaxShortFloatValue);
 		}
+	}
+}
+
+void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length)
+{
+	// Create new buffer on stack because buffer was marked as const in API
+	memcpy_s(writableBuffer, FRAME_SIZE_SAMPLES * sizeof(short), buffer, length);
+
+	// Apply noise suppression
+	NoiseSuppressionProcess(writableBuffer, FRAME_SIZE_SAMPLES);
+
+	// Get current microphone noise level
+	const DWORD currentMicLevel = BASS_ChannelGetLevel(handle);
+
+	// Get left channel noise level from it (because it's mono so right = left)
+	const uint16_t leftChannelLevel = LOWORD(currentMicLevel);
+
+	// Convert to float from 0.f to 1.f
+	micLevel = static_cast<float>(leftChannelLevel) / MaxShortFloatValue;
+
+	if (VoiceCallback)
+	{
+		const int opusBufferSize = encoder->EncodeShort(writableBuffer, FRAME_SIZE_SAMPLES, opusBuffer, bitrate);
+		VoiceCallback(opusBuffer, opusBufferSize);
 	}
 }

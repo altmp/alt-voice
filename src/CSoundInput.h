@@ -14,6 +14,7 @@ class CSoundInput : public ISoundIO
 
 	HRECORD recordChannel = 0;
 	COpusEncoder* encoder = nullptr;
+	int bitrate;
 
 	float volume = 1.f;
 	float micLevel = 0;
@@ -22,7 +23,11 @@ class CSoundInput : public ISoundIO
 	HFX VolumeChangeFX;
 	DenoiseState* denoiser;
 
+	short writableBuffer[FRAME_SIZE_SAMPLES];
 	float floatBuffer[FRAME_SIZE_SAMPLES];
+	char* opusBuffer = nullptr;
+
+	OnVoiceCallback VoiceCallback = nullptr;
 
 public:
 	CSoundInput(int _bitRate);
@@ -41,8 +46,12 @@ public:
 	AltVoiceError SelectDevice(int id) override;
 	int GetDevice() override;
 
-	void SetNoiseSuppressionEnabled(const bool enabled) override;
+	void RegisterCallback(OnVoiceCallback callback) override;
 
+	void SetNoiseSuppressionEnabled(const bool enabled) override;
 	void NoiseSuppressionProcess(void* buffer, DWORD length);
+	void SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length);
+
+	static BOOL OnSoundFrame(HRECORD handle, const void* buffer, DWORD length, void* user);
 };
 

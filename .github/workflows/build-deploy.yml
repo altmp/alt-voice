@@ -35,6 +35,11 @@ jobs:
           copy build\windows\x64\release\alt-voice.lib upload\lib\release
           copy build\windows\x64\debug\alt-voice.lib upload\lib\debug
           copy include\alt-voice.h upload\include
+          copy include\IAudioFilter.h upload\include
+          copy include\IOpusDecoder.h upload\include
+          copy include\IOpusEncoder.h upload\include
+          copy include\ISoundIO.h upload\include
+          copy include\VoiceError.h upload\include
 
       - uses: actions/upload-artifact@v3
         with:
@@ -97,7 +102,7 @@ jobs:
 
       - name: Zip artifacts
         run: |
-          zip -r alt-voice-windows dist-windows/*
+          cd dist-windows && zip -r ../alt-voice-windows.zip .
       # zip -r alt-voice-linux dist-linux/*
 
       - name: Set outputs
