@@ -52,7 +52,8 @@ jobs:
           copy include\IAudioFilter.h upload\include
           copy include\IOpusDecoder.h upload\include
           copy include\IOpusEncoder.h upload\include
-          copy include\ISoundIO.h upload\include
+          copy include\ISoundInput.h upload\include
+          copy include\ISoundOutput.h upload\include
           copy include\VoiceError.h upload\include
 
       - uses: actions/upload-artifact@v3
