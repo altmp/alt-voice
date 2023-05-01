@@ -42,7 +42,7 @@ public:
 	[[nodiscard]] float GetLevel() const override;
 
 	[[nodiscard]] int GetNumDevices() const override;
-	[[nodiscard]] char* GetDeviceName(int id) const override;
+	[[nodiscard]] const char* GetDeviceName(int id) const override;
 	AltVoiceError SelectDevice(int id) override;
 	[[nodiscard]] int GetDevice() const override;
 

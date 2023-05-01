@@ -19,7 +19,7 @@ public:
 	void Write(void* data, size_t size, OnVoiceCallback filterCallback = nullptr) override;
 
 	[[nodiscard]] int GetNumDevices() const override;
-	[[nodiscard]] char* GetDeviceName(int id) const override;
+	[[nodiscard]] const char* GetDeviceName(int id) const override;
 	[[nodiscard]] AltVoiceError SelectDevice(int id) override;
 	[[nodiscard]] int GetDevice() const override;
 

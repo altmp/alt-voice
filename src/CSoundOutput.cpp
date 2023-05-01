@@ -53,7 +53,7 @@ int CSoundOutput::GetNumDevices() const
 	return numDevices;
 }
 
-char* CSoundOutput::GetDeviceName(int id) const
+const char* CSoundOutput::GetDeviceName(int id) const
 {
 	BASS_DEVICEINFO deviceInfo;
 	for (int i = 0; BASS_GetDeviceInfo(i, &deviceInfo); i++)
@@ -62,7 +62,7 @@ char* CSoundOutput::GetDeviceName(int id) const
 			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) != BASS_DEVICE_TYPE_MICROPHONE &&
 			i == id)
 		{
-			return const_cast<char*>(deviceInfo.name);
+			return deviceInfo.name;
 		}
 	}
 	return nullptr;

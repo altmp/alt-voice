@@ -18,7 +18,7 @@ public:
 	[[nodiscard]] virtual float GetLevel() const = 0;
 
 	[[nodiscard]] virtual int GetNumDevices() const = 0;
-	[[nodiscard]] virtual char* GetDeviceName(int id) const = 0;
+	[[nodiscard]] virtual const char* GetDeviceName(int id) const = 0;
 	[[nodiscard]] virtual AltVoiceError SelectDevice(int id) = 0;
 	[[nodiscard]] virtual int GetDevice() const = 0;
 
