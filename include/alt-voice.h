@@ -1,5 +1,6 @@
 #pragma once
-#include "ISoundIO.h"
+#include "ISoundInput.h"
+#include "ISoundOutput.h"
 #include "IOpusEncoder.h"
 #include "IOpusDecoder.h"
 #include "VoiceError.h"
@@ -12,9 +13,9 @@ constexpr int FRAME_SIZE_SAMPLES = SAMPLE_RATE / 50;
 constexpr int FRAME_SIZE_BYTES = FRAME_SIZE_SAMPLES * sizeof(int16_t);
 
 AltVoiceError AV_Initialize();
-AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundIO** soundOutput);
-AltVoiceError AV_CreateSoundInput(int bitrate, ISoundIO** soundInput);
-void AV_DestroySoundInput(const ISoundIO* _input);
+AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundOutput** soundOutput);
+AltVoiceError AV_CreateSoundInput(int bitrate, ISoundInput** soundInput);
+void AV_DestroySoundInput(const ISoundInput* _input);
 const char* AV_GetVoiceErrorText(AltVoiceError error);
 AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int bitRate);
 AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder);

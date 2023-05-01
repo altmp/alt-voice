@@ -3,11 +3,11 @@
 #include <rnnoise.h>
 
 #include "alt-voice.h"
-#include "ISoundIO.h"
+#include "ISoundInput.h"
 #include "COpusEncoder.h"
 #include "VoiceError.h"
 
-class CSoundInput : public ISoundIO
+class CSoundInput : public ISoundInput
 {
 	static constexpr int RNNoiseFrameSize = 480;
 	static constexpr float MaxShortFloatValue = 32768.0f;
@@ -34,24 +34,25 @@ public:
 	~CSoundInput() override;
 
 	void SetVolume(float gain) override;
-	float GetVolume() override;
+	[[nodiscard]] float GetVolume() const override;
 
 	void SetStreamEnabled(bool enabled) override;
-	int Read(void* data, const size_t size) override;
+	int Read(void* data, size_t size) override;
 
-	float GetLevel() override;
+	[[nodiscard]] float GetLevel() const override;
 
-	int GetNumDevices() override;
-	char* GetDeviceName(int id) override;
+	[[nodiscard]] int GetNumDevices() const override;
+	[[nodiscard]] char* GetDeviceName(int id) const override;
 	AltVoiceError SelectDevice(int id) override;
-	int GetDevice() override;
+	[[nodiscard]] int GetDevice() const override;
 
 	void RegisterCallback(OnVoiceCallback callback) override;
 
-	void SetNoiseSuppressionEnabled(const bool enabled) override;
+	void SetNoiseSuppressionEnabled(bool enabled) override;
 	void NoiseSuppressionProcess(void* buffer, DWORD length);
-	void SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length);
+	[[nodiscard]] bool IsNoiseSuppressionEnabled() const override;
 
+	void SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length);
 	static BOOL OnSoundFrame(HRECORD handle, const void* buffer, DWORD length, void* user);
 };
 

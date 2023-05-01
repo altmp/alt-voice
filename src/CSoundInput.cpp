@@ -28,7 +28,7 @@ void CSoundInput::SetVolume(float gain)
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 }
 
-float CSoundInput::GetVolume()
+float CSoundInput::GetVolume() const
 {
 	return volume;
 }
@@ -38,7 +38,7 @@ int CSoundInput::Read(void* data, size_t size)
 	return 0;
 }
 
-float CSoundInput::GetLevel()
+float CSoundInput::GetLevel() const
 {
 	return micLevel;
 }
@@ -48,7 +48,7 @@ void CSoundInput::SetStreamEnabled(bool enabled)
 	enabled ? BASS_ChannelPlay(recordChannel, FALSE) : BASS_ChannelPause(recordChannel);
 }
 
-int CSoundInput::GetNumDevices()
+int CSoundInput::GetNumDevices() const
 {
 	int numDevices = 0;
 	BASS_DEVICEINFO deviceInfo;
@@ -64,7 +64,7 @@ int CSoundInput::GetNumDevices()
 	return numDevices;
 }
 
-char* CSoundInput::GetDeviceName(int id)
+char* CSoundInput::GetDeviceName(int id) const
 {
 	BASS_DEVICEINFO deviceInfo;
 	for (int i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
@@ -114,7 +114,7 @@ AltVoiceError CSoundInput::SelectDevice(int id)
 	return AltVoiceError::Ok;
 }
 
-int CSoundInput::GetDevice()
+int CSoundInput::GetDevice() const
 {
 	return BASS_RecordGetDevice();
 }
@@ -138,6 +138,11 @@ BOOL CSoundInput::OnSoundFrame(HRECORD handle, const void* buffer, DWORD length,
 		self->SoundFrameCaptured(handle, (char*)buffer + i, FRAME_SIZE_SAMPLES * sizeof(short));
 	}
 	return true;
+}
+
+bool CSoundInput::IsNoiseSuppressionEnabled() const
+{
+	return noiseSuppressionEnabled;
 }
 
 void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)

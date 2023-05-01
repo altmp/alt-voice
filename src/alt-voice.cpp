@@ -17,7 +17,7 @@ AltVoiceError AV_Initialize()
 	return AltVoiceError::Ok;
 }
 
-AltVoiceError AV_CreateSoundInput(int bitrate, ISoundIO** soundInput)
+AltVoiceError AV_CreateSoundInput(int bitrate, ISoundInput** soundInput)
 {
 	try
 	{
@@ -31,7 +31,7 @@ AltVoiceError AV_CreateSoundInput(int bitrate, ISoundIO** soundInput)
 	return AltVoiceError::Ok;
 }
 
-AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundIO** soundOutput)
+AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundOutput** soundOutput)
 {
 	try
 	{
@@ -45,7 +45,7 @@ AltVoiceError AV_CreateSoundOutput(int bitrate, ISoundIO** soundOutput)
 	return AltVoiceError::Ok;
 }
 
-void AV_DestroySoundInput(const ISoundIO* _input)
+void AV_DestroySoundInput(const ISoundInput* _input)
 {
 	delete _input;
 }

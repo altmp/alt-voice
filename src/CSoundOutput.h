@@ -2,11 +2,11 @@
 #include <bass.h>
 
 #include "alt-voice.h"
-#include "ISoundIO.h"
+#include "ISoundOutput.h"
 #include "VoiceError.h"
 #include "COpusDecoder.h"
 
-class CSoundOutput : public ISoundIO
+class CSoundOutput : public ISoundOutput
 {
 private:
 	HSTREAM outputStream = 0;
@@ -18,10 +18,12 @@ public:
 
 	void Write(void* data, size_t size, OnVoiceCallback filterCallback = nullptr) override;
 
-	int GetNumDevices() override;
-	char* GetDeviceName(int id) override;
-	AltVoiceError SelectDevice(int id) override;
-	int GetDevice() override;
+	[[nodiscard]] int GetNumDevices() const override;
+	[[nodiscard]] char* GetDeviceName(int id) const override;
+	[[nodiscard]] AltVoiceError SelectDevice(int id) override;
+	[[nodiscard]] int GetDevice() const override;
 
 	void SetStreamEnabled(bool enabled) override;
+	void SetVolume(float vol) override;
+	[[nodiscard]] float GetVolume() const override;
 };

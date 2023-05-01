@@ -29,7 +29,16 @@ void CSoundOutput::SetStreamEnabled(bool enabled)
 	enabled ? BASS_ChannelPlay(outputStream, FALSE) : BASS_ChannelPause(outputStream);
 }
 
-int CSoundOutput::GetNumDevices()
+void CSoundOutput::SetVolume(float vol)
+{
+}
+
+float CSoundOutput::GetVolume() const
+{
+	return 0.f;
+}
+
+int CSoundOutput::GetNumDevices() const
 {
 	int numDevices = 0;
 	BASS_DEVICEINFO deviceInfo;
@@ -44,7 +53,7 @@ int CSoundOutput::GetNumDevices()
 	return numDevices;
 }
 
-char* CSoundOutput::GetDeviceName(int id)
+char* CSoundOutput::GetDeviceName(int id) const
 {
 	BASS_DEVICEINFO deviceInfo;
 	for (int i = 0; BASS_GetDeviceInfo(i, &deviceInfo); i++)
@@ -53,7 +62,7 @@ char* CSoundOutput::GetDeviceName(int id)
 			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) != BASS_DEVICE_TYPE_MICROPHONE &&
 			i == id)
 		{
-			return (char*)deviceInfo.name;
+			return const_cast<char*>(deviceInfo.name);
 		}
 	}
 	return nullptr;
@@ -89,7 +98,7 @@ AltVoiceError CSoundOutput::SelectDevice(int id)
 	return AltVoiceError::Ok;
 }
 
-int CSoundOutput::GetDevice()
+int CSoundOutput::GetDevice() const
 {
 	return 1;
 }
