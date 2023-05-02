@@ -42,9 +42,11 @@ public:
 	[[nodiscard]] float GetLevel() const override;
 
 	[[nodiscard]] int GetNumDevices() const override;
-	[[nodiscard]] const char* GetDeviceName(int id) const override;
-	AltVoiceError SelectDevice(int id) override;
-	[[nodiscard]] int GetDevice() const override;
+	[[nodiscard]] uint32_t GetDeviceIdFromIndex(int index) const override;
+	[[nodiscard]] const char* GetDeviceName(uint32_t deviceId) const override;
+	[[nodiscard]] const char* GetDeviceUID(uint32_t deviceId) const override;
+	AltVoiceError SelectDeviceByUID(const char* uuid) override;
+	[[nodiscard]] const char* GetCurrentDeviceUID() const override;
 
 	void RegisterCallback(OnVoiceCallback callback) override;
 

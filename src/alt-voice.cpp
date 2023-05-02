@@ -12,6 +12,7 @@
 AltVoiceError AV_Initialize()
 {
 	BASS_Init(0, SAMPLE_RATE, 0, nullptr, nullptr);
+	BASS_SetConfig(BASS_CONFIG_UNICODE, true);
 	BASS_FX_GetVersion();
 
 	return AltVoiceError::Ok;

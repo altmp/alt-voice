@@ -18,9 +18,11 @@ public:
 	[[nodiscard]] virtual float GetLevel() const = 0;
 
 	[[nodiscard]] virtual int GetNumDevices() const = 0;
-	[[nodiscard]] virtual const char* GetDeviceName(int id) const = 0;
-	[[nodiscard]] virtual AltVoiceError SelectDevice(int id) = 0;
-	[[nodiscard]] virtual int GetDevice() const = 0;
+	[[nodiscard]] virtual uint32_t GetDeviceIdFromIndex(int index) const = 0;
+	[[nodiscard]] virtual const char* GetDeviceName(uint32_t deviceId) const = 0;
+	[[nodiscard]] virtual const char* GetDeviceUID(uint32_t deviceId) const = 0;
+	[[nodiscard]] virtual AltVoiceError SelectDeviceByUID(const char* uuid) = 0;
+	[[nodiscard]] virtual const char* GetCurrentDeviceUID() const = 0;
 
 	virtual void RegisterCallback(OnVoiceCallback callback) = 0;
 

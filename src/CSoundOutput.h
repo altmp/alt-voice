@@ -19,9 +19,11 @@ public:
 	void Write(void* data, size_t size, OnVoiceCallback filterCallback = nullptr) override;
 
 	[[nodiscard]] int GetNumDevices() const override;
-	[[nodiscard]] const char* GetDeviceName(int id) const override;
-	[[nodiscard]] AltVoiceError SelectDevice(int id) override;
-	[[nodiscard]] int GetDevice() const override;
+	[[nodiscard]] uint32_t GetDeviceIdFromIndex(int index) const override;
+	[[nodiscard]] const char* GetDeviceName(uint32_t deviceId) const override;
+	[[nodiscard]] const char* GetDeviceUID(uint32_t deviceId) const override;
+	AltVoiceError SelectDeviceByUID(const char* uuid) override;
+	[[nodiscard]] const char* GetCurrentDeviceUID() const override;
 
 	void SetStreamEnabled(bool enabled) override;
 	void SetVolume(float vol) override;

@@ -4,8 +4,8 @@
 
 #include <alt-voice.h>
 
-ISoundIO* soundInput = nullptr;
-ISoundIO* soundOutput = nullptr;
+ISoundInput* soundInput = nullptr;
+ISoundOutput* soundOutput = nullptr;
 IAudioFilter* RadioFilter = nullptr;
 
 void ApplyFilter(void* buffer, uint32_t length)
@@ -35,12 +35,12 @@ int main()
 
 	for (int i = 0; i < numDevices; i++)
 	{
-		printf("%d: %s\n", i, soundOutput->GetDeviceName(i));
+		const int deviceId = soundOutput->GetDeviceIdFromIndex(i);
+		printf("%d: %s[%s]\n", i, soundOutput->GetDeviceName(deviceId), soundOutput->GetDeviceUID(deviceId));
 	}
 
-	soundOutput->SelectDevice(-1);
+	soundOutput->SelectDeviceByUID("default");
 	soundOutput->SetStreamEnabled(true);
-
 
 	AV_CreateSoundInput(64000, &soundInput);
 
@@ -49,12 +49,13 @@ int main()
 
 	for (int i = 0; i < numDevices; i++)
 	{
-		printf("%d: %s\n", i, soundInput->GetDeviceName(i));
+		const int deviceId = soundInput->GetDeviceIdFromIndex(i);
+		printf("%d: %s[%s]\n", i, soundInput->GetDeviceName(deviceId), soundInput->GetDeviceUID(deviceId));
 	}
 
 	soundInput->RegisterCallback(AudioThread);
 	soundInput->SetVolume(1.0f);
-	soundInput->SelectDevice(-1);
+	soundInput->SelectDeviceByUID("default");
 	soundInput->SetStreamEnabled(true);
 	soundInput->SetNoiseSuppressionEnabled(true);
 

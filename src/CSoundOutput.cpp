@@ -42,7 +42,7 @@ int CSoundOutput::GetNumDevices() const
 {
 	int numDevices = 0;
 	BASS_DEVICEINFO deviceInfo;
-	for (int i = 0; BASS_GetDeviceInfo(i, &deviceInfo); i++)
+	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
 		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
 			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) != BASS_DEVICE_TYPE_MICROPHONE)
@@ -53,23 +53,71 @@ int CSoundOutput::GetNumDevices() const
 	return numDevices;
 }
 
-const char* CSoundOutput::GetDeviceName(int id) const
+uint32_t CSoundOutput::GetDeviceIdFromIndex(int index) const
 {
 	BASS_DEVICEINFO deviceInfo;
-	for (int i = 0; BASS_GetDeviceInfo(i, &deviceInfo); i++)
+	int indexCounter = 0;
+	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
 		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
-			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) != BASS_DEVICE_TYPE_MICROPHONE &&
-			i == id)
+			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) != BASS_DEVICE_TYPE_MICROPHONE)
 		{
-			return deviceInfo.name;
+			if (indexCounter == index)
+				return i;
+			indexCounter++;
 		}
 	}
-	return nullptr;
+	return 0xFFFFFFFF;
 }
 
-AltVoiceError CSoundOutput::SelectDevice(int id)
+const char* CSoundOutput::GetDeviceName(const uint32_t deviceId) const
 {
+	BASS_DEVICEINFO deviceInfo;
+	const BOOL result = BASS_RecordGetDeviceInfo(deviceId, &deviceInfo);
+	return result ? deviceInfo.name : "INVALID DEVICE";
+}
+
+const char* CSoundOutput::GetDeviceUID(uint32_t deviceId) const
+{
+	BASS_DEVICEINFO deviceInfo;
+	const BOOL result = BASS_RecordGetDeviceInfo(deviceId, &deviceInfo);
+	return result ? deviceInfo.driver : "invalid";
+}
+
+AltVoiceError CSoundOutput::SelectDeviceByUID(const char* uid)
+{
+	/*BASS_DEVICEINFO deviceInfo;
+
+	int nextDeviceId = -1;
+
+	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
+	{
+		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
+			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK) &&
+			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) == BASS_DEVICE_TYPE_MICROPHONE)
+		{
+			if (!strcmp(deviceInfo.driver, uid))
+			{
+				nextDeviceId = i;
+				break;
+			}
+		}
+	}
+
+	if (strcmp(uid, "default") != 0 && nextDeviceId == -1)
+		return AltVoiceError::MissingDevice;
+
+	if (recordChannel == 0)
+	{
+		if (!BASS_RecordInit(nextDeviceId))
+			return AltVoiceError::DeviceInit;
+	}
+	else
+	{
+		if (!BASS_RecordSetDevice(nextDeviceId))
+			return AltVoiceError::DeviceInit;
+	}
+
 	int deviceId = -1;
 	BASS_DEVICEINFO deviceInfo;
 	for (int i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
@@ -80,9 +128,9 @@ AltVoiceError CSoundOutput::SelectDevice(int id)
 		{
 			deviceId = id;
 		}
-	}
+	}*/
 
-	if (!BASS_Init(deviceId, SAMPLE_RATE, 0, nullptr, nullptr))
+	if (!BASS_Init(-1, SAMPLE_RATE, 0, nullptr, nullptr))
 	{
 		if(BASS_ErrorGetCode() != BASS_ERROR_ALREADY)
 			return AltVoiceError::DeviceInit;
@@ -98,7 +146,11 @@ AltVoiceError CSoundOutput::SelectDevice(int id)
 	return AltVoiceError::Ok;
 }
 
-int CSoundOutput::GetDevice() const
+const char* CSoundOutput::GetCurrentDeviceUID() const
 {
-	return 1;
+	/*BASS_DEVICEINFO deviceInfo;
+	const uint32_t currentDevice = BASS_ChannelGetDevice();
+	const BOOL result = BASS_RecordGetDeviceInfo(currentDevice, &deviceInfo);
+	return result ? deviceInfo.driver : "invalid";*/
+	return "invalid";
 }
