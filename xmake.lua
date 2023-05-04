@@ -8,7 +8,11 @@ set_languages("cxx20", "cxx2a")
 set_runtimes(is_mode("debug") and "MDd" or "MD")
 set_symbols("debug")
 
-add_requires("bass", "bass-fx", "libopus", "rnnoise f75e7dd", {verify = false})
+
+add_requires("bass", {verify = false})
+add_requires("bass-fx", {verify = false})
+add_requires("libopus", {verify = false})
+add_requires("rnnoise f75e7dd", {verify = false})
 
 target("alt-voice")
     set_default(true)
