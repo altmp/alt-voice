@@ -3,6 +3,7 @@
 #include <regex>
 
 #include <alt-voice.h>
+#include <iostream>
 
 ISoundInput* soundInput = nullptr;
 ISoundOutput* soundOutput = nullptr;
@@ -20,6 +21,7 @@ void AudioThread(void* buffer, uint32_t size)
 
 int main()
 {
+	std::vector<std::string> inputDevices;
 	AV_Initialize();
 
 	AltVoiceError filterCreateError = AV_CreateAudioFilter(&RadioFilter);
@@ -50,17 +52,33 @@ int main()
 	for (int i = 0; i < numDevices; i++)
 	{
 		const int deviceId = soundInput->GetDeviceIdFromIndex(i);
+		inputDevices.push_back(soundInput->GetDeviceUID(deviceId));
 		printf("%d: %s[%s]\n", i, soundInput->GetDeviceName(deviceId), soundInput->GetDeviceUID(deviceId));
 	}
 
 	soundInput->RegisterCallback(AudioThread);
 	soundInput->SetVolume(1.0f);
-	soundInput->SelectDeviceByUID("default");
+	soundInput->SelectDeviceByUID(nullptr);
 	soundInput->SetStreamEnabled(true);
 	soundInput->SetNoiseSuppressionEnabled(true);
+	std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
 
 	for(;;)
 	{
-		Sleep(1000);
+		int nextDeviceIndex = 0;
+		std::cin >> nextDeviceIndex;
+
+		if (nextDeviceIndex < inputDevices.size())
+		{
+			auto err = soundInput->SelectDeviceByUID(inputDevices[nextDeviceIndex].c_str());
+			if (err != AltVoiceError::Ok)
+			{
+				std::cout << AV_GetVoiceErrorText(err) << std::endl;
+			}
+			else
+			{
+				std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
+			}
+		}
 	}
 }

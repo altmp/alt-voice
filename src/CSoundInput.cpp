@@ -102,33 +102,30 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 
 	int nextDeviceId = -1;
 
-	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
+	if (uid != nullptr)
 	{
-		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
-			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK) &&
-			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) == BASS_DEVICE_TYPE_MICROPHONE)
+		for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 		{
-			if (!strcmp(deviceInfo.driver, uid))
+			if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
+				!(deviceInfo.flags & BASS_DEVICE_LOOPBACK) &&
+				(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) == BASS_DEVICE_TYPE_MICROPHONE)
 			{
-				nextDeviceId = i;
-				break;
+				if (!strcmp(deviceInfo.driver, uid))
+				{
+					nextDeviceId = i;
+					break;
+				}
 			}
 		}
+		if (nextDeviceId == -1)
+			return AltVoiceError::MissingDevice;
 	}
 
-	if (strcmp(uid, "default") != 0 && nextDeviceId == -1)
-		return AltVoiceError::MissingDevice;
+	if (recordChannel != 0)
+		BASS_RecordFree();
 
-	if (recordChannel == 0)
-	{
-		if (!BASS_RecordInit(nextDeviceId))
-			return AltVoiceError::DeviceInit;
-	}
-	else
-	{
-		if (!BASS_RecordSetDevice(nextDeviceId))
-			return AltVoiceError::DeviceInit;
-	}
+	if (!BASS_RecordInit(nextDeviceId))
+		return AltVoiceError::DeviceInit;
 
 	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, OnSoundFrame, this);
 	BASS_ChannelSetAttribute(recordChannel, BASS_ATTRIB_GRANULE, FRAME_SIZE_SAMPLES);
