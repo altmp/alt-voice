@@ -8,10 +8,11 @@ set_languages("cxx20", "cxx2a")
 set_runtimes(is_mode("debug") and "MDd" or "MD")
 set_symbols("debug")
 
+add_repositories("local-repo localpkg")
 
 add_requires("bass", {verify = false})
 add_requires("bass-fx", {verify = false})
-add_requires("libopus", {verify = false})
+add_requires("libopus", {verify = false, configs = { avxSupported = false, opusx86MayHaveAvx = false }})
 add_requires("rnnoise f75e7dd", {verify = false})
 
 target("alt-voice")
@@ -22,6 +23,7 @@ target("alt-voice")
     add_headerfiles("src/**.h", "include/**.h")
     add_includedirs("src/", "include/", { public = true })
     add_packages("bass", "bass-fx", "libopus", "rnnoise")
+
     after_build(function (target)
         for pkg, pkg_details in pairs(target:pkgs()) do
             if os.isdir(pkg_details._INFO.installdir) then
