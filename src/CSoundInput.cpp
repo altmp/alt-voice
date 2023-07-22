@@ -121,6 +121,8 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 			return AltVoiceError::MissingDevice;
 	}
 
+	isDefault = !uid;
+
 	if (recordChannel != 0)
 		BASS_RecordFree();
 
@@ -138,6 +140,9 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	if (!recordChannel)
 		return AltVoiceError::StartStream;
 
+	recording = true;
+	deviceLost = false;
+
 	return AltVoiceError::Ok;
 }
 
@@ -147,6 +152,37 @@ const char* CSoundInput::GetCurrentDeviceUID() const
 	const uint32_t currentDevice = BASS_RecordGetDevice();
 	const BOOL result = BASS_RecordGetDeviceInfo(currentDevice, &deviceInfo);
 	return result ? deviceInfo.driver : "invalid";
+}
+
+void CSoundInput::UpdateDevice()
+{
+	if (!recording || isDefault) return;
+
+	auto currentDeviceUID = GetCurrentDeviceUID();
+	
+	if(deviceLost)
+	{
+		SelectDeviceByUID(nullptr);
+		return;
+	}
+
+	bool deviceAlive = false;
+	auto numDevices = GetNumDevices();
+	for (int i = 0; i < numDevices; i++)
+	{
+		const int deviceId = GetDeviceIdFromIndex(i);
+
+		if (strcmp(GetDeviceUID(deviceId), currentDeviceUID) == 0)
+		{
+			deviceAlive = true;
+			break;
+		}
+	}
+	if(!deviceAlive)
+	{
+		deviceLost = true;
+		return;
+	}
 }
 
 void CSoundInput::RegisterCallback(OnVoiceCallback callback)

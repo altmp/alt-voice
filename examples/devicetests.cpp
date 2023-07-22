@@ -26,9 +26,11 @@ int main()
 
 	AltVoiceError filterCreateError = AV_CreateAudioFilter(&RadioFilter);
 
+	/*
 	auto bqLowEffect = RadioFilter->ApplyBqfEffect(0, 1400, 0, 0.86f, 0, 0, 1);
 	auto bqHighEffect = RadioFilter->ApplyBqfEffect(1, 900, 0, 0.83f, 0, 0, 2);
 	auto distortionEffect = RadioFilter->ApplyDistortionEffect(0.0f, -2.95f, -0.05f, -0.18f, 1.f, 3);
+	*/
 
 	AV_CreateSoundOutput(64000, &soundOutput);
 
@@ -65,20 +67,26 @@ int main()
 
 	for(;;)
 	{
-		int nextDeviceIndex = 0;
-		std::cin >> nextDeviceIndex;
+		std::string cmd;
+		std::cin >> cmd;
 
-		if (nextDeviceIndex < inputDevices.size())
+		if(cmd == "devices")
 		{
-			auto err = soundInput->SelectDeviceByUID(inputDevices[nextDeviceIndex].c_str());
-			if (err != AltVoiceError::Ok)
+			numDevices = soundInput->GetNumDevices();
+			printf("number of input devices: %d\n", numDevices);
+
+			for (int i = 0; i < numDevices; i++)
 			{
-				std::cout << AV_GetVoiceErrorText(err) << std::endl;
+				const int deviceId = soundInput->GetDeviceIdFromIndex(i);
+				inputDevices.push_back(soundInput->GetDeviceUID(deviceId));
+				printf("%d: %s[%s]\n", i, soundInput->GetDeviceName(deviceId), soundInput->GetDeviceUID(deviceId));
 			}
-			else
-			{
-				std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
-			}
+		}
+		else if(cmd == "device")
+		{
+			auto device = soundInput->GetCurrentDeviceUID();
+			printf("current device: %s", device);
+			soundInput->UpdateDevice();
 		}
 	}
 }

@@ -24,6 +24,8 @@ public:
 	[[nodiscard]] virtual AltVoiceError SelectDeviceByUID(const char* uuid) = 0;
 	[[nodiscard]] virtual const char* GetCurrentDeviceUID() const = 0;
 
+	virtual void UpdateDevice() = 0;
+
 	virtual void RegisterCallback(OnVoiceCallback callback) = 0;
 
 	virtual void SetStreamEnabled(bool enabled) = 0;

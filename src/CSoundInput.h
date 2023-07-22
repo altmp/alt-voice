@@ -28,7 +28,10 @@ class CSoundInput : public ISoundInput
 	char* opusBuffer = nullptr;
 
 	OnVoiceCallback VoiceCallback = nullptr;
-
+	
+	bool recording = false;
+	bool deviceLost = false;
+	bool isDefault = true;
 public:
 	CSoundInput(int _bitRate);
 	~CSoundInput() override;
@@ -47,6 +50,7 @@ public:
 	[[nodiscard]] const char* GetDeviceUID(uint32_t deviceId) const override;
 	AltVoiceError SelectDeviceByUID(const char* uuid) override;
 	[[nodiscard]] const char* GetCurrentDeviceUID() const override;
+	void UpdateDevice() override;
 
 	void RegisterCallback(OnVoiceCallback callback) override;
 
