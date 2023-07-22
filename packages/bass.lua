@@ -1,12 +1,12 @@
 package("bass")
     if is_plat("windows") then
         add_urls("https://www.un4seen.com/files/bass$(version).zip")
-        add_versions("24", "29dd7991eaa8c0e5c73968f8e0922ac214800a80fce89217d66745bc80f5f5b3")
+        add_versions("24", "bd6d5f41ddc3162084a876836b73ddde7ed1f19dd529d37db404157482ba9e5f")
     end
 
     if is_plat("linux") then
         add_urls("https://www.un4seen.com/files/bass$(version)-linux.zip")
-        add_versions("24", "a72fdacb6bb23b899362d449ac0e36ada0b68d57825dce07b28cdcc91f76912c")
+        add_versions("24", "6ee779f4b85da821d4a5383cf3e8266592a2ba108ff59976754fc0f8a6b4e4fd")
     end
 
     on_install("windows", function (package)
