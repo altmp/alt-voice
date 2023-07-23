@@ -49,6 +49,7 @@ public:
 	[[nodiscard]] const char* GetDeviceName(uint32_t deviceId) const override;
 	[[nodiscard]] const char* GetDeviceUID(uint32_t deviceId) const override;
 	AltVoiceError SelectDeviceByUID(const char* uuid) override;
+	AltVoiceError SelectDeviceByUID(const std::string& uuid) override;
 	[[nodiscard]] const char* GetCurrentDeviceUID() const override;
 	void UpdateDevice() override;
 

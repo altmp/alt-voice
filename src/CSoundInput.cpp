@@ -146,6 +146,11 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	return AltVoiceError::Ok;
 }
 
+AltVoiceError CSoundInput::SelectDeviceByUID(const std::string& uuid)
+{
+	return SelectDeviceByUID(uuid.empty() ? nullptr : uuid.c_str());
+}
+
 const char* CSoundInput::GetCurrentDeviceUID() const
 {
 	BASS_DEVICEINFO deviceInfo;

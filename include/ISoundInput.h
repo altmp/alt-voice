@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <string>
 
 #include "ISoundOutput.h"
 #include "VoiceError.h"
@@ -22,6 +23,7 @@ public:
 	[[nodiscard]] virtual const char* GetDeviceName(uint32_t deviceId) const = 0;
 	[[nodiscard]] virtual const char* GetDeviceUID(uint32_t deviceId) const = 0;
 	[[nodiscard]] virtual AltVoiceError SelectDeviceByUID(const char* uuid) = 0;
+	[[nodiscard]] virtual AltVoiceError SelectDeviceByUID(const std::string& uuid) = 0;
 	[[nodiscard]] virtual const char* GetCurrentDeviceUID() const = 0;
 
 	virtual void UpdateDevice() = 0;
