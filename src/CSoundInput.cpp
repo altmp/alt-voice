@@ -118,7 +118,7 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 			}
 		}
 		if (nextDeviceId == -1)
-			return AltVoiceError::MissingDevice;
+			uid = nullptr;
 	}
 
 	isDefault = !uid;
