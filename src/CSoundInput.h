@@ -11,6 +11,7 @@ class CSoundInput : public ISoundInput
 {
 	static constexpr int RNNoiseFrameSize = 480;
 	static constexpr float MaxShortFloatValue = 32768.0f;
+	static constexpr int NORMALIZE_FRAME_COUNT = 20;
 
 	HRECORD recordChannel = 0;
 	COpusEncoder* encoder = nullptr;
@@ -19,6 +20,9 @@ class CSoundInput : public ISoundInput
 	float volume = 1.f;
 	float micLevel = 0;
 	bool noiseSuppressionEnabled = false;
+
+	bool normalizationEnabled = false;
+	float normalizeMax = 0.f;
 
 	HFX VolumeChangeFX;
 	DenoiseState* denoiser;
@@ -56,8 +60,12 @@ public:
 	void RegisterCallback(OnVoiceCallback callback) override;
 
 	void SetNoiseSuppressionEnabled(bool enabled) override;
-	void NoiseSuppressionProcess(void* buffer, DWORD length);
 	[[nodiscard]] bool IsNoiseSuppressionEnabled() const override;
+	void NoiseSuppressionProcess(void* buffer, DWORD length);
+
+	void SetNormalizatonEnabled(bool enabled) override;
+	[[nodiscard]] bool IsNormalizationEnabled() const override;
+	void Normalize(short* buffer, DWORD length);
 
 	void SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length);
 	static BOOL OnSoundFrame(HRECORD handle, const void* buffer, DWORD length, void* user);

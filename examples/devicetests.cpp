@@ -63,6 +63,7 @@ int main()
 	soundInput->SelectDeviceByUID(nullptr);
 	soundInput->SetStreamEnabled(true);
 	soundInput->SetNoiseSuppressionEnabled(true);
+	soundInput->SetNormalizatonEnabled(true);
 	std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
 
 	for(;;)

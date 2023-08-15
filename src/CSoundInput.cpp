@@ -242,6 +242,44 @@ void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
 	}
 }
 
+void CSoundInput::SetNormalizatonEnabled(bool enabled)
+{
+	normalizationEnabled = enabled;
+}
+
+bool CSoundInput::IsNormalizationEnabled() const
+{
+	return normalizationEnabled;
+}
+
+void CSoundInput::Normalize(short* buffer, DWORD length)
+{
+	if(normalizationEnabled)
+	{
+		short maxFrame = 0;
+		for (int i = 0; i < length; ++i)
+		{
+			short s = abs(buffer[i]);
+			if (s > maxFrame)
+				maxFrame = s;
+		}
+
+		if (normalizeMax == 0.f || maxFrame > normalizeMax || normalizeMax / maxFrame < 0.5)
+			normalizeMax = maxFrame;
+		else
+			normalizeMax = (normalizeMax * (NORMALIZE_FRAME_COUNT - 1) + maxFrame) / NORMALIZE_FRAME_COUNT;
+
+		if (normalizeMax <= 1.f)
+			return;
+
+		float gain = MAXSHORT / normalizeMax / 2;
+		gain = std::fmin<float, float>(gain, 10);
+
+		for (int i = 0; i < length; ++i)
+			buffer[i] *= gain;
+	}
+}
+
 void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length)
 {
 	// Create new buffer on stack because buffer was marked as const in API
@@ -249,6 +287,9 @@ void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD l
 
 	// Apply noise suppression
 	NoiseSuppressionProcess(writableBuffer, FRAME_SIZE_SAMPLES);
+
+	// Apply normalization
+	Normalize(writableBuffer, FRAME_SIZE_SAMPLES);
 
 	// Get current microphone noise level
 	const DWORD currentMicLevel = BASS_ChannelGetLevel(handle);

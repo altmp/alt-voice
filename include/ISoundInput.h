@@ -33,4 +33,7 @@ public:
 	virtual void SetStreamEnabled(bool enabled) = 0;
 	virtual void SetNoiseSuppressionEnabled(bool enabled) = 0;
 	[[nodiscard]] virtual bool IsNoiseSuppressionEnabled() const = 0;
+
+	virtual void SetNormalizatonEnabled(bool enabled) = 0;
+	[[nodiscard]] virtual bool IsNormalizationEnabled() const = 0;
 };
