@@ -67,26 +67,20 @@ int main()
 
 	for(;;)
 	{
-		std::string cmd;
-		std::cin >> cmd;
+		int nextDeviceIndex = 0;
+		std::cin >> nextDeviceIndex;
 
-		if(cmd == "devices")
+		if (nextDeviceIndex < inputDevices.size())
 		{
-			numDevices = soundInput->GetNumDevices();
-			printf("number of input devices: %d\n", numDevices);
-
-			for (int i = 0; i < numDevices; i++)
+			auto err = soundInput->SelectDeviceByUID(inputDevices[nextDeviceIndex].c_str());
+			if (err != AltVoiceError::Ok)
 			{
-				const int deviceId = soundInput->GetDeviceIdFromIndex(i);
-				inputDevices.push_back(soundInput->GetDeviceUID(deviceId));
-				printf("%d: %s[%s]\n", i, soundInput->GetDeviceName(deviceId), soundInput->GetDeviceUID(deviceId));
+				std::cout << AV_GetVoiceErrorText(err) << std::endl;
 			}
-		}
-		else if(cmd == "device")
-		{
-			auto device = soundInput->GetCurrentDeviceUID();
-			printf("current device: %s", device);
-			soundInput->UpdateDevice();
+			else
+			{
+				std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
+			}
 		}
 	}
 }
