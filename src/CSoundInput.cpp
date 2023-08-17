@@ -225,7 +225,7 @@ void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
 		// Convert the 16-bit integer samples to floating-point samples
 		for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
 		{
-			floatBuffer[i] = static_cast<float>(shortSamples[i]) / MaxShortFloatValue;
+			floatBuffer[i] = static_cast<float>(shortSamples[i]);
 		}
 
 		// Pass the floating-point samples to the RNNoise function
@@ -237,7 +237,7 @@ void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
 		// Convert the floating-point samples back to 16-bit integer samples
 		for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
 		{
-			shortSamples[i] = static_cast<int16_t>(floatBuffer[i] * MaxShortFloatValue);
+			shortSamples[i] = static_cast<int16_t>(floatBuffer[i]);
 		}
 	}
 }
@@ -285,11 +285,11 @@ void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD l
 	// Create new buffer on stack because buffer was marked as const in API
 	memcpy_s(writableBuffer, FRAME_SIZE_SAMPLES * sizeof(short), buffer, length);
 
-	// Apply noise suppression
-	NoiseSuppressionProcess(writableBuffer, FRAME_SIZE_SAMPLES);
-
 	// Apply normalization
 	Normalize(writableBuffer, FRAME_SIZE_SAMPLES);
+
+	// Apply noise suppression
+	NoiseSuppressionProcess(writableBuffer, FRAME_SIZE_SAMPLES);
 
 	// Get current microphone noise level
 	const DWORD currentMicLevel = BASS_ChannelGetLevel(handle);
