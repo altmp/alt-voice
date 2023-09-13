@@ -292,13 +292,8 @@ void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD l
 	NoiseSuppressionProcess(writableBuffer, FRAME_SIZE_SAMPLES);
 
 	// Get current microphone noise level
-	const DWORD currentMicLevel = BASS_ChannelGetLevel(handle);
-
-	// Get left channel noise level from it (because it's mono so right = left)
-	const uint16_t leftChannelLevel = LOWORD(currentMicLevel);
-
-	// Convert to float from 0.f to 1.f
-	micLevel = static_cast<float>(leftChannelLevel) / MaxShortFloatValue;
+	BASS_ChannelGetLevelEx(handle, &micLevel, 0.05, BASS_LEVEL_MONO | BASS_LEVEL_RMS | BASS_LEVEL_NOREMOVE);
+	micLevel = std::clamp(micLevel * 2.0f, 0.0f, 1.0f);
 
 	if (VoiceCallback)
 	{
