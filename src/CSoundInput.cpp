@@ -15,6 +15,7 @@ CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, A
 
 CSoundInput::~CSoundInput()
 {
+	std::unique_lock lock{ inputMutex };
 	delete encoder;
 	delete opusBuffer;
 	rnnoise_destroy(denoiser);
@@ -203,6 +204,7 @@ void CSoundInput::SetNoiseSuppressionEnabled(const bool enabled)
 BOOL CSoundInput::OnSoundFrame(HRECORD handle, const void* buffer, DWORD length, void* user)
 {
 	const auto self = static_cast<CSoundInput*>(user);
+	std::unique_lock lock{ self->inputMutex };
 
 	for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
 	{
