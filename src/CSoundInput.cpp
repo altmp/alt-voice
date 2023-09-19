@@ -15,11 +15,21 @@ CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, A
 
 CSoundInput::~CSoundInput()
 {
+	if (recordChannel)
+	{
+		BASS_ChannelStop(recordChannel);
+		BASS_ChannelFree(recordChannel);
+	}
+	BASS_RecordFree();
+
 	std::unique_lock lock{ inputMutex };
 	delete encoder;
 	delete opusBuffer;
 	rnnoise_destroy(denoiser);
-	BASS_RecordFree();
+
+	encoder = nullptr;
+	opusBuffer = nullptr;
+	denoiser = nullptr;
 }
 
 void CSoundInput::SetVolume(float gain)
