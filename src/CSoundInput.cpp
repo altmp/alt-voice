@@ -1,10 +1,12 @@
+#include "CSoundInput.h"
+
 #include <chrono>
 #include <fstream>
-#include "CSoundInput.h"
-#include <bass_fx.h>
-
-#include "alt-voice.h"
 #include <iostream>
+#include <algorithm>
+
+#include <bass_fx.h>
+#include "alt-voice.h"
 
 
 CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate)), bitrate(_bitRate)
@@ -15,8 +17,20 @@ CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, A
 
 CSoundInput::~CSoundInput()
 {
-	if (recordChannel)
+	if (recordChannel != 0)
 	{
+		if (noiseSuppressionDsp != 0)
+		{
+			BASS_ChannelRemoveDSP(recordChannel, noiseSuppressionDsp);
+			noiseSuppressionDsp = 0;
+		}
+
+		if (normalizationDsp != 0)
+		{
+			BASS_ChannelRemoveDSP(recordChannel, normalizationDsp);
+			normalizationDsp = 0;
+		}
+
 		BASS_ChannelStop(recordChannel);
 		BASS_ChannelFree(recordChannel);
 	}
@@ -135,7 +149,20 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	isDefault = !uid;
 
 	if (recordChannel != 0)
+	{
+		if (noiseSuppressionDsp != 0)
+		{
+			BASS_ChannelRemoveDSP(recordChannel, noiseSuppressionDsp);
+			noiseSuppressionDsp = 0;
+		}
+
+		if (normalizationDsp != 0)
+		{
+			BASS_ChannelRemoveDSP(recordChannel, normalizationDsp);
+			normalizationDsp = 0;
+		}
 		BASS_RecordFree();
+	}
 
 	if (!BASS_RecordInit(nextDeviceId))
 		return AltVoiceError::DeviceInit;
@@ -150,8 +177,8 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume };
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 
-	BASS_ChannelSetDSP(recordChannel, NoiseDSP, this, 2); //higher prio called first
-	BASS_ChannelSetDSP(recordChannel, NormalizeDSP, this, 1);
+	noiseSuppressionDsp = BASS_ChannelSetDSP(recordChannel, NoiseDSP, this, 2); //higher prio called first
+	normalizationDsp = BASS_ChannelSetDSP(recordChannel, NormalizeDSP, this, 1);
 	//BASS_ChannelSetDSP(recordChannel, RMSDSP, this, 0); //higher prio called first
 
 	BASS_ChannelStart(levelChannel);
@@ -298,8 +325,6 @@ void CSoundInput::Normalize(void* buffer, DWORD length)
 void CSoundInput::NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)
 {
 	const auto self = static_cast<CSoundInput*>(user);
-	std::unique_lock lock{ self->inputMutex };
-
 	if (self->IsNormalizationEnabled())
 	{
 		for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
@@ -312,8 +337,6 @@ void CSoundInput::NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD l
 void CSoundInput::NoiseDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)
 {
 	const auto self = static_cast<CSoundInput*>(user);
-	std::unique_lock lock{ self->inputMutex };
-
 	if(self->IsNoiseSuppressionEnabled())
 	{
 		for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))

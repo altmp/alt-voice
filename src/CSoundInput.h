@@ -27,6 +27,9 @@ class CSoundInput : public ISoundInput
 	bool normalizationEnabled = false;
 	float normalizeMax = 0.f;
 
+	HDSP noiseSuppressionDsp = 0;
+	HDSP normalizationDsp = 0;
+
 	HFX VolumeChangeFX;
 	DenoiseState* denoiser;
 
