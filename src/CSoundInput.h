@@ -42,8 +42,6 @@ class CSoundInput : public ISoundInput
 	bool recording = false;
 	bool deviceLost = false;
 	bool isDefault = true;
-
-	std::mutex inputMutex;
 public:
 	CSoundInput(int _bitRate);
 	~CSoundInput() override;
