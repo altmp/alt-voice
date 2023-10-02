@@ -66,6 +66,8 @@ int main()
 	soundInput->SetNormalizatonEnabled(true);
 	std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
 
+	//AV_DestroySoundInput(soundInput);
+
 	for(;;)
 	{
 		int nextDeviceIndex = 0;

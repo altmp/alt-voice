@@ -15,11 +15,13 @@ class CSoundInput : public ISoundInput
 	static constexpr int NORMALIZE_FRAME_COUNT = 20;
 
 	HRECORD recordChannel = 0;
+	HSTREAM levelChannel = 0;
 	COpusEncoder* encoder = nullptr;
 	int bitrate;
 
 	float volume = 1.f;
-	float micLevel = 0;
+	float micLevel = 0.f;
+	float micLevelDb = 0.f;
 	bool noiseSuppressionEnabled = false;
 
 	bool normalizationEnabled = false;
@@ -49,7 +51,7 @@ public:
 	void SetStreamEnabled(bool enabled) override;
 	int Read(void* data, size_t size) override;
 
-	[[nodiscard]] float GetLevel() const override;
+	[[nodiscard]] float GetLevel(bool db) const override;
 
 	[[nodiscard]] int GetNumDevices() const override;
 	[[nodiscard]] uint32_t GetDeviceIdFromIndex(int index) const override;
@@ -68,9 +70,11 @@ public:
 
 	void SetNormalizatonEnabled(bool enabled) override;
 	[[nodiscard]] bool IsNormalizationEnabled() const override;
-	void Normalize(short* buffer, DWORD length);
+	void Normalize(void* buffer, DWORD length);
 
 	void SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length);
 	static BOOL OnSoundFrame(HRECORD handle, const void* buffer, DWORD length, void* user);
+	static void NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user);
+	static void NoiseDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user);
 };
 

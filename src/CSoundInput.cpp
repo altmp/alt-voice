@@ -49,9 +49,9 @@ int CSoundInput::Read(void* data, size_t size)
 	return 0;
 }
 
-float CSoundInput::GetLevel() const
+float CSoundInput::GetLevel(bool db) const
 {
-	return micLevel;
+	return db ? micLevelDb : micLevel;
 }
 
 void CSoundInput::SetStreamEnabled(bool enabled)
@@ -143,11 +143,20 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, OnSoundFrame, this);
 	BASS_ChannelSetAttribute(recordChannel, BASS_ATTRIB_GRANULE, FRAME_SIZE_SAMPLES);
 
+	levelChannel = BASS_StreamCreate(SAMPLE_RATE, AUDIO_CHANNELS, BASS_STREAM_DECODE, STREAMPROC_PUSH, this);
+
 	// Change input volume
-	VolumeChangeFX = BASS_ChannelSetFX(recordChannel, BASS_FX_BFX_VOLUME, 0);
+	VolumeChangeFX = BASS_ChannelSetFX(levelChannel, BASS_FX_BFX_VOLUME, 0);
 	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume };
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
-	
+
+	BASS_ChannelSetDSP(recordChannel, NoiseDSP, this, 2); //higher prio called first
+	BASS_ChannelSetDSP(recordChannel, NormalizeDSP, this, 1);
+	//BASS_ChannelSetDSP(recordChannel, RMSDSP, this, 0); //higher prio called first
+
+	BASS_ChannelStart(levelChannel);
+	BASS_ChannelPlay(levelChannel, false);
+
 	if (!recordChannel)
 		return AltVoiceError::StartStream;
 
@@ -230,27 +239,24 @@ bool CSoundInput::IsNoiseSuppressionEnabled() const
 
 void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
 {
-	if (noiseSuppressionEnabled)
+	const auto shortSamples = static_cast<short*>(buffer);
+
+	// Convert the 16-bit integer samples to floating-point samples
+	for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
 	{
-		const auto shortSamples = static_cast<short*>(buffer);
+		floatBuffer[i] = static_cast<float>(shortSamples[i]);
+	}
 
-		// Convert the 16-bit integer samples to floating-point samples
-		for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
-		{
-			floatBuffer[i] = static_cast<float>(shortSamples[i]);
-		}
+	// Pass the floating-point samples to the RNNoise function
+	for (int i = 0; i < FRAME_SIZE_SAMPLES; i += RNNoiseFrameSize)
+	{
+		rnnoise_process_frame(denoiser, floatBuffer + i, floatBuffer + i);
+	}
 
-		// Pass the floating-point samples to the RNNoise function
-		for (int i = 0; i < FRAME_SIZE_SAMPLES; i += RNNoiseFrameSize)
-		{
-			rnnoise_process_frame(denoiser, floatBuffer + i, floatBuffer + i);
-		}
-
-		// Convert the floating-point samples back to 16-bit integer samples
-		for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
-		{
-			shortSamples[i] = static_cast<int16_t>(floatBuffer[i]);
-		}
+	// Convert the floating-point samples back to 16-bit integer samples
+	for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
+	{
+		shortSamples[i] = static_cast<int16_t>(floatBuffer[i]);
 	}
 }
 
@@ -264,48 +270,82 @@ bool CSoundInput::IsNormalizationEnabled() const
 	return normalizationEnabled;
 }
 
-void CSoundInput::Normalize(short* buffer, DWORD length)
+void CSoundInput::Normalize(void* buffer, DWORD length)
 {
-	if(normalizationEnabled)
+	short maxFrame = 0;
+	for (int i = 0; i < length; ++i)
 	{
-		short maxFrame = 0;
-		for (int i = 0; i < length; ++i)
+		short s = abs(((short*)buffer)[i]);
+		if (s > maxFrame)
+			maxFrame = s;
+	}
+
+	if (normalizeMax == 0.f || maxFrame > normalizeMax || normalizeMax / maxFrame < 0.5)
+		normalizeMax = maxFrame;
+	else
+		normalizeMax = (normalizeMax * (NORMALIZE_FRAME_COUNT - 1) + maxFrame) / NORMALIZE_FRAME_COUNT;
+
+	if (normalizeMax <= 1.f)
+		return;
+
+	float gain = MAXSHORT / normalizeMax / 2;
+	gain = std::fmin<float, float>(gain, 10);
+
+	for (int i = 0; i < length; ++i)
+		((short*)buffer)[i] *= gain;
+}
+
+void CSoundInput::NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)
+{
+	const auto self = static_cast<CSoundInput*>(user);
+	std::unique_lock lock{ self->inputMutex };
+
+	if (self->IsNormalizationEnabled())
+	{
+		for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
 		{
-			short s = abs(buffer[i]);
-			if (s > maxFrame)
-				maxFrame = s;
+			self->Normalize((char*)buffer + i, FRAME_SIZE_SAMPLES);
 		}
+	}
+}
 
-		if (normalizeMax == 0.f || maxFrame > normalizeMax || normalizeMax / maxFrame < 0.5)
-			normalizeMax = maxFrame;
-		else
-			normalizeMax = (normalizeMax * (NORMALIZE_FRAME_COUNT - 1) + maxFrame) / NORMALIZE_FRAME_COUNT;
+void CSoundInput::NoiseDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)
+{
+	const auto self = static_cast<CSoundInput*>(user);
+	std::unique_lock lock{ self->inputMutex };
 
-		if (normalizeMax <= 1.f)
-			return;
-
-		float gain = MAXSHORT / normalizeMax / 2;
-		gain = std::fmin<float, float>(gain, 10);
-
-		for (int i = 0; i < length; ++i)
-			buffer[i] *= gain;
+	if(self->IsNoiseSuppressionEnabled())
+	{
+		for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
+		{
+			self->NoiseSuppressionProcess((char*)buffer + i, FRAME_SIZE_SAMPLES);
+		}
 	}
 }
 
 void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length)
 {
-	// Create new buffer on stack because buffer was marked as const in API
+	// Put available data in the level channel
+	BASS_StreamPutData(levelChannel, buffer, length * sizeof(short)); 
+
+	// Get current microphone noise level from level channel
+	const DWORD currentMicLevel = BASS_ChannelGetLevel(levelChannel);
+
+	// Get left channel noise level from it (because it's mono so right = left)
+	const uint16_t leftChannelLevel = LOWORD(currentMicLevel);
+
+	// Convert to float from 0.f to 1.f
+	micLevel = static_cast<float>(leftChannelLevel) / MaxShortFloatValue;
+
+	// Convert level to decibels
+	micLevelDb = (micLevel > 0 ? 20 * log10(micLevel) : -HUGE_VAL);
+	micLevelDb = std::clamp(micLevelDb, -100.f, 0.f);
+
+	// Remove data from level channel (is there a better way to do it?)
+	BASS_ChannelGetData(levelChannel, writableBuffer, length * sizeof(short));
+
+	// Copy mic data to output buffer
 	memcpy_s(writableBuffer, FRAME_SIZE_SAMPLES * sizeof(short), buffer, length);
-
-	// Apply normalization
-	Normalize(writableBuffer, FRAME_SIZE_SAMPLES);
-
-	// Apply noise suppression
-	NoiseSuppressionProcess(writableBuffer, FRAME_SIZE_SAMPLES);
-
-	// Get current microphone noise level
-	BASS_ChannelGetLevelEx(handle, &micLevel, 0.05, BASS_LEVEL_MONO | BASS_LEVEL_RMS | BASS_LEVEL_NOREMOVE);
-	micLevel = std::clamp(micLevel * 2.0f, 0.0f, 1.0f);
 
 	if (VoiceCallback)
 	{

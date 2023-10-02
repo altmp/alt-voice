@@ -16,7 +16,7 @@ public:
 
 	[[nodiscard]] virtual int Read(void* data, size_t size) = 0;
 
-	[[nodiscard]] virtual float GetLevel() const = 0;
+	[[nodiscard]] virtual float GetLevel(bool db = false) const = 0;
 
 	[[nodiscard]] virtual int GetNumDevices() const = 0;
 	[[nodiscard]] virtual uint32_t GetDeviceIdFromIndex(int index) const = 0;
