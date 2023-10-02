@@ -1,5 +1,6 @@
 #include <chrono>
 #include <fstream>
+#include <algorithm>
 #include "CSoundInput.h"
 #include <bass_fx.h>
 
