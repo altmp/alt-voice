@@ -28,6 +28,7 @@ class CSoundInput : public ISoundInput
 	float normalizeMax = 0.f;
 
 	HFX VolumeChangeFX;
+	HFX LevelVolumeChangeFX;
 	DenoiseState* denoiser;
 
 	short writableBuffer[FRAME_SIZE_SAMPLES];
@@ -36,11 +37,10 @@ class CSoundInput : public ISoundInput
 
 	OnVoiceCallback VoiceCallback = nullptr;
 	
-	bool recording = false;
 	bool deviceLost = false;
 	bool isDefault = true;
 
-	std::mutex inputMutex;
+	std::atomic_bool recording = false;
 public:
 	CSoundInput(int _bitRate);
 	~CSoundInput() override;

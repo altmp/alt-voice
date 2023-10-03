@@ -16,6 +16,8 @@ CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, A
 
 CSoundInput::~CSoundInput()
 {
+	recording = false;
+
 	if (recordChannel)
 	{
 		BASS_ChannelStop(recordChannel);
@@ -23,7 +25,6 @@ CSoundInput::~CSoundInput()
 	}
 	BASS_RecordFree();
 
-	std::unique_lock lock{ inputMutex };
 	delete encoder;
 	delete opusBuffer;
 	rnnoise_destroy(denoiser);
@@ -37,6 +38,7 @@ void CSoundInput::SetVolume(float gain)
 {
 	volume = gain;
 	const BASS_BFX_VOLUME VolumeChangeFXParams = { 0, volume };
+	BASS_FXSetParameters(LevelVolumeChangeFX, &VolumeChangeFXParams);
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 }
 
@@ -141,14 +143,20 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	if (!BASS_RecordInit(nextDeviceId))
 		return AltVoiceError::DeviceInit;
 
+	recording = true;
+
 	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, OnSoundFrame, this);
 	BASS_ChannelSetAttribute(recordChannel, BASS_ATTRIB_GRANULE, FRAME_SIZE_SAMPLES);
 
 	levelChannel = BASS_StreamCreate(SAMPLE_RATE, AUDIO_CHANNELS, BASS_STREAM_DECODE, STREAMPROC_PUSH, this);
 
 	// Change input volume
-	VolumeChangeFX = BASS_ChannelSetFX(levelChannel, BASS_FX_BFX_VOLUME, 0);
 	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume };
+
+	LevelVolumeChangeFX = BASS_ChannelSetFX(levelChannel, BASS_FX_BFX_VOLUME, 0);
+	BASS_FXSetParameters(LevelVolumeChangeFX, &VolumeChangeFXParams);
+
+	VolumeChangeFX = BASS_ChannelSetFX(levelChannel, BASS_FX_BFX_VOLUME, 0);
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 
 	BASS_ChannelSetDSP(recordChannel, NoiseDSP, this, 2); //higher prio called first
@@ -161,7 +169,6 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	if (!recordChannel)
 		return AltVoiceError::StartStream;
 
-	recording = true;
 	deviceLost = false;
 
 	return AltVoiceError::Ok;
@@ -224,7 +231,9 @@ void CSoundInput::SetNoiseSuppressionEnabled(const bool enabled)
 BOOL CSoundInput::OnSoundFrame(HRECORD handle, const void* buffer, DWORD length, void* user)
 {
 	const auto self = static_cast<CSoundInput*>(user);
-	std::unique_lock lock{ self->inputMutex };
+
+	if (!self->recording)
+		return false;
 
 	for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
 	{
