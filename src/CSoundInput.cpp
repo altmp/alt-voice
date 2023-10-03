@@ -299,8 +299,6 @@ void CSoundInput::Normalize(void* buffer, DWORD length)
 void CSoundInput::NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)
 {
 	const auto self = static_cast<CSoundInput*>(user);
-	std::unique_lock lock{ self->inputMutex };
-
 	if (self->IsNormalizationEnabled())
 	{
 		for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
@@ -313,8 +311,6 @@ void CSoundInput::NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD l
 void CSoundInput::NoiseDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)
 {
 	const auto self = static_cast<CSoundInput*>(user);
-	std::unique_lock lock{ self->inputMutex };
-
 	if(self->IsNoiseSuppressionEnabled())
 	{
 		for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
