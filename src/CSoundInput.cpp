@@ -345,7 +345,7 @@ void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD l
 
 	// Convert level to decibels
 	micLevelDb = (micLevel > 0 ? 20 * log10(micLevel) : -HUGE_VAL);
-	micLevelDb = std::clamp(micLevelDb, -100.f, 0.f);
+	micLevelDb = std::clamp(micLevelDb, -100.f, 0.f) + 100.f;
 
 	// Remove data from level channel (is there a better way to do it?)
 	BASS_ChannelGetData(levelChannel, writableBuffer, length * sizeof(short));
