@@ -1,12 +1,20 @@
+#define NOMINMAX
+
 #include <chrono>
 #include <fstream>
 #include <algorithm>
+#include <limits>
 #include "CSoundInput.h"
 #include <bass_fx.h>
 
 #include "alt-voice.h"
 #include <iostream>
 
+// https://github.com/mumble-voip/mumble/pull/5363/files
+static short clampFloatSample(float v) {
+	return static_cast<short>(std::min(std::max(v, static_cast<float>(std::numeric_limits<short>::min())),
+		static_cast<float>(std::numeric_limits<short>::max())));
+}
 
 CSoundInput::CSoundInput(int _bitRate) : encoder(new COpusEncoder(SAMPLE_RATE, AUDIO_CHANNELS, _bitRate)), bitrate(_bitRate)
 {
@@ -266,7 +274,7 @@ void CSoundInput::NoiseSuppressionProcess(void* buffer, DWORD length)
 	// Convert the floating-point samples back to 16-bit integer samples
 	for (int i = 0; i < FRAME_SIZE_SAMPLES; i++)
 	{
-		shortSamples[i] = static_cast<int16_t>(floatBuffer[i]);
+		shortSamples[i] = static_cast<int16_t>(clampFloatSample(floatBuffer[i]));
 	}
 }
 
