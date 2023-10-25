@@ -5,7 +5,7 @@
 COpusEncoder::COpusEncoder(int sampleRate, int channels, int bitRate)
 {
 	int opusErr;
-	encoder = opus_encoder_create(sampleRate, channels, OPUS_APPLICATION_VOIP, &opusErr);
+	encoder = opus_encoder_create(sampleRate, channels, OPUS_APPLICATION_AUDIO, &opusErr);
 	if (opusErr != OPUS_OK || encoder == nullptr)
 		throw CVoiceException(AltVoiceError::OpusEncoderCreateError);
 
