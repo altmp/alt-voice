@@ -288,29 +288,43 @@ bool CSoundInput::IsNormalizationEnabled() const
 	return normalizationEnabled;
 }
 
-void CSoundInput::Normalize(void* buffer, DWORD length)
+void CSoundInput::Normalize(void* buffer, DWORD sampleCount)
 {
 	short maxFrame = 0;
-	for (int i = 0; i < length; ++i)
+	for (int i = 0; i < sampleCount; ++i)
 	{
 		short s = abs(((short*)buffer)[i]);
 		if (s > maxFrame)
 			maxFrame = s;
 	}
 
-	if (normalizeMax == 0.f || maxFrame > normalizeMax || normalizeMax / maxFrame < 0.5)
+	// Update normalizeMax using a running average or directly based on conditions
+	if (normalizeMax == 0.f || maxFrame > normalizeMax || normalizeMax / maxFrame < 0.5) {
 		normalizeMax = maxFrame;
-	else
+	}
+	else {
 		normalizeMax = (normalizeMax * (NORMALIZE_FRAME_COUNT - 1) + maxFrame) / NORMALIZE_FRAME_COUNT;
+	}
 
-	if (normalizeMax <= 1.f)
+	if (normalizeMax <= 1.f) {
 		return;
+	}
 
-	float gain = MAXSHORT / normalizeMax / 2;
-	gain = std::fmin<float, float>(gain, 10);
+	float desiredGain = MAXSHORT / normalizeMax / 2;
+	desiredGain = std::fmin(desiredGain, 10.0f);
 
-	for (int i = 0; i < length; ++i)
-		((short*)buffer)[i] *= gain;
+	// Smooth the transition of gain
+	static float currentGain = 1.0f;
+	float smoothingFactor = 0.05f;
+	currentNormalizationGain = (1 - smoothingFactor) * currentNormalizationGain + smoothingFactor * desiredGain;
+
+	const auto shortSamples = static_cast<short*>(buffer);
+
+	for (int i = 0; i < sampleCount; ++i)
+	{
+		float processedSample = (float)shortSamples[i] * currentGain;
+		shortSamples[i] = static_cast<int16_t>(clampFloatSample(processedSample));
+	}
 }
 
 void CSoundInput::NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)

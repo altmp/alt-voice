@@ -22,6 +22,7 @@ class CSoundInput : public ISoundInput
 	float volume = 1.f;
 	float micLevel = 0.f;
 	float micLevelDb = 0.f;
+	float currentNormalizationGain = 1.f;
 	bool noiseSuppressionEnabled = false;
 
 	bool normalizationEnabled = false;
