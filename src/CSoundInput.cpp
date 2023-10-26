@@ -314,15 +314,13 @@ void CSoundInput::Normalize(void* buffer, DWORD sampleCount)
 	desiredGain = std::fmin(desiredGain, 10.0f);
 
 	// Smooth the transition of gain
-	static float currentGain = 1.0f;
-	float smoothingFactor = 0.05f;
-	currentNormalizationGain = (1 - smoothingFactor) * currentNormalizationGain + smoothingFactor * desiredGain;
+	currentNormalizationGain = (1 - NORMALIZE_SMOOTHING_FACTOR) * currentNormalizationGain + NORMALIZE_SMOOTHING_FACTOR * desiredGain;
 
-	const auto shortSamples = static_cast<short*>(buffer);
+	auto shortSamples = static_cast<short*>(buffer);
 
 	for (int i = 0; i < sampleCount; ++i)
 	{
-		float processedSample = (float)shortSamples[i] * currentGain;
+		float processedSample = (float)shortSamples[i] * currentNormalizationGain;
 		shortSamples[i] = static_cast<int16_t>(clampFloatSample(processedSample));
 	}
 }
