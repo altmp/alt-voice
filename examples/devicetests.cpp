@@ -68,21 +68,43 @@ int main()
 
 	//AV_DestroySoundInput(soundInput);
 
+	bool noiseSuppression = true;
+	bool normalizationEnabled = true;
+
 	for(;;)
 	{
 		int nextDeviceIndex = 0;
-		std::cin >> nextDeviceIndex;
+		std::string input;
+		std::cin >> input;
 
-		if (nextDeviceIndex < inputDevices.size())
+		if (input == "n")
 		{
-			auto err = soundInput->SelectDeviceByUID(inputDevices[nextDeviceIndex].c_str());
-			if (err != AltVoiceError::Ok)
-			{
-				std::cout << AV_GetVoiceErrorText(err) << std::endl;
+			noiseSuppression = !noiseSuppression;
+			soundInput->SetNoiseSuppressionEnabled(noiseSuppression);
+		}
+		else if (input == "o")
+		{
+			normalizationEnabled = !normalizationEnabled;
+			soundInput->SetNormalizatonEnabled(normalizationEnabled);
+		}
+		else {
+			try {
+				nextDeviceIndex = std::stoi(input);
+				if (nextDeviceIndex < inputDevices.size())
+				{
+					auto err = soundInput->SelectDeviceByUID(inputDevices[nextDeviceIndex].c_str());
+					if (err != AltVoiceError::Ok)
+					{
+						std::cout << AV_GetVoiceErrorText(err) << std::endl;
+					}
+					else
+					{
+						std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
+					}
+				}
 			}
-			else
-			{
-				std::cout << soundInput->GetCurrentDeviceUID() << std::endl;
+			catch(...) {
+				std::cout << "Unknown argument. Possible: n, o, [number]" << std::endl;
 			}
 		}
 	}
