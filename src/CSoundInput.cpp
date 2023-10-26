@@ -44,8 +44,8 @@ CSoundInput::~CSoundInput()
 
 void CSoundInput::SetVolume(float gain)
 {
-	volume = gain * 2;
-	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume };
+	volume = gain;
+	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume * 2 };
 	BASS_FXSetParameters(LevelVolumeChangeFX, &VolumeChangeFXParams);
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 }
@@ -162,11 +162,10 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	LevelVolumeChangeFX = BASS_ChannelSetFX(levelChannel, BASS_FX_BFX_VOLUME, 0);
 	VolumeChangeFX = BASS_ChannelSetFX(recordChannel, BASS_FX_BFX_VOLUME, 0);
 
-	SetVolume(1.f);
+	SetVolume(volume);
 
 	BASS_ChannelSetDSP(recordChannel, NoiseDSP, this, 2); //higher prio called first
 	BASS_ChannelSetDSP(recordChannel, NormalizeDSP, this, 1);
-	//BASS_ChannelSetDSP(recordChannel, RMSDSP, this, 0); //higher prio called first
 
 	BASS_ChannelStart(levelChannel);
 	BASS_ChannelPlay(levelChannel, false);
