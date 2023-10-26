@@ -12,7 +12,8 @@ class CSoundInput : public ISoundInput
 {
 	static constexpr int RNNoiseFrameSize = 480;
 	static constexpr float MaxShortFloatValue = 32768.0f;
-	static constexpr int NORMALIZE_FRAME_COUNT = 20;
+	static constexpr int NORMALIZE_FRAME_COUNT = 50;
+	static constexpr float NORMALIZE_SMOOTHING_FACTOR = 0.05f;
 
 	HRECORD recordChannel = 0;
 	HSTREAM levelChannel = 0;
