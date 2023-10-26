@@ -16,13 +16,14 @@ add_requires("libopus", {verify = false, configs = { avxSupported = false, opusx
 add_requires("rnnoise f75e7dd", {verify = false})
 
 target("alt-voice")
-    set_default(true)
+    set_default(false)
     set_kind("static")
     set_prefixname("")
     add_files("src/**.cpp")
     add_headerfiles("src/**.h", "include/**.h")
     add_includedirs("src/", "include/", { public = true })
     add_packages("bass", "bass-fx", "libopus", "rnnoise")
+    add_rules("plugin.vsxmake.autoupdate")
 
     after_build(function (target)
         for pkg, pkg_details in pairs(target:pkgs()) do
@@ -36,10 +37,9 @@ target("alt-voice")
     end)
 
 target("devicetests")
-    set_default(false)
+    set_default(true)
     set_kind("binary")
     add_files("examples/devicetests.cpp")
     add_packages("bass", "bass-fx", "libopus")
     add_deps("alt-voice")
-
-add_rules("plugin.vsxmake.autoupdate")
+    add_rules("plugin.vsxmake.autoupdate")
