@@ -77,8 +77,7 @@ int CSoundInput::GetNumDevices() const
 	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
 		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
-			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK) &&
-			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) == BASS_DEVICE_TYPE_MICROPHONE)
+			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK))
 		{
 			numDevices++;
 		}
@@ -93,8 +92,7 @@ uint32_t CSoundInput::GetDeviceIdFromIndex(int index) const
 	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
 		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
-			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK) &&
-			(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) == BASS_DEVICE_TYPE_MICROPHONE)
+			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK))
 		{
 			if (indexCounter == index)
 				return i;
