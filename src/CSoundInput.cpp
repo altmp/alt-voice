@@ -76,8 +76,35 @@ int CSoundInput::GetNumDevices() const
 	BASS_DEVICEINFO deviceInfo;
 	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
-		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
-			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK))
+		uint32_t deviceType = deviceInfo.flags & BASS_DEVICE_TYPE_MASK;
+		std::string deviceTypeName;
+
+		switch (deviceType)
+		{
+		case BASS_DEVICE_TYPE_NETWORK: deviceTypeName = "Network"; break;
+		case BASS_DEVICE_TYPE_SPEAKERS: deviceTypeName = "Speakers"; break;
+		case BASS_DEVICE_TYPE_LINE: deviceTypeName = "Line"; break;
+		case BASS_DEVICE_TYPE_HEADPHONES: deviceTypeName = "Headphones"; break;
+		case BASS_DEVICE_TYPE_MICROPHONE: deviceTypeName = "Microphone"; break;
+		case BASS_DEVICE_TYPE_HEADSET: deviceTypeName = "Headset"; break;
+		case BASS_DEVICE_TYPE_HANDSET: deviceTypeName = "Handset"; break;
+		case BASS_DEVICE_TYPE_DIGITAL: deviceTypeName = "Digital"; break;
+		case BASS_DEVICE_TYPE_SPDIF: deviceTypeName = "S/PDIF"; break;
+		case BASS_DEVICE_TYPE_HDMI: deviceTypeName = "HDMI"; break;
+		case BASS_DEVICE_TYPE_DISPLAYPORT: deviceTypeName = "DisplayPort"; break;
+		default: deviceTypeName = "Unknown"; break;
+		}
+
+		// Log all the flags
+		std::cout << "Device #" << i << ": " << deviceInfo.name << ", Type: " << deviceTypeName << std::endl;
+		std::cout << "Flags:" << std::endl;
+		std::cout << "  Enabled: " << ((deviceInfo.flags & BASS_DEVICE_ENABLED) ? "Yes" : "No") << std::endl;
+		std::cout << "  Default: " << ((deviceInfo.flags & BASS_DEVICE_DEFAULT) ? "Yes" : "No") << std::endl;
+		std::cout << "  Initialized: " << ((deviceInfo.flags & BASS_DEVICE_INIT) ? "Yes" : "No") << std::endl;
+		std::cout << "  Loopback: " << ((deviceInfo.flags & BASS_DEVICE_LOOPBACK) ? "Yes" : "No") << std::endl;
+		std::cout << "  Default Communications: " << ((deviceInfo.flags & BASS_DEVICE_DEFAULTCOM) ? "Yes" : "No") << std::endl << std::endl;
+
+		if (deviceInfo.flags & BASS_DEVICE_ENABLED)
 		{
 			numDevices++;
 		}
@@ -91,8 +118,7 @@ uint32_t CSoundInput::GetDeviceIdFromIndex(int index) const
 	int indexCounter = 0;
 	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
-		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
-			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK))
+		if (deviceInfo.flags & BASS_DEVICE_ENABLED)
 		{
 			if (indexCounter == index)
 				return i;
@@ -126,9 +152,7 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	{
 		for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 		{
-			if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
-				!(deviceInfo.flags & BASS_DEVICE_LOOPBACK) &&
-				(deviceInfo.flags & BASS_DEVICE_TYPE_MASK) == BASS_DEVICE_TYPE_MICROPHONE)
+			if (deviceInfo.flags & BASS_DEVICE_ENABLED)
 			{
 				if (!strcmp(deviceInfo.driver, uid))
 				{
@@ -194,8 +218,8 @@ void CSoundInput::UpdateDevice()
 	if (!recording || isDefault) return;
 
 	auto currentDeviceUID = GetCurrentDeviceUID();
-	
-	if(deviceLost)
+
+	if (deviceLost)
 	{
 		SelectDeviceByUID(nullptr);
 		return;
@@ -213,7 +237,7 @@ void CSoundInput::UpdateDevice()
 			break;
 		}
 	}
-	if(!deviceAlive)
+	if (!deviceAlive)
 	{
 		deviceLost = true;
 		return;
@@ -334,7 +358,7 @@ void CSoundInput::NormalizeDSP(HDSP handle, DWORD channel, void* buffer, DWORD l
 void CSoundInput::NoiseDSP(HDSP handle, DWORD channel, void* buffer, DWORD length, void* user)
 {
 	const auto self = static_cast<CSoundInput*>(user);
-	if(self->IsNoiseSuppressionEnabled())
+	if (self->IsNoiseSuppressionEnabled())
 	{
 		for (int i = 0; i < length; i += (FRAME_SIZE_SAMPLES * sizeof(short)))
 		{
@@ -346,7 +370,7 @@ void CSoundInput::NoiseDSP(HDSP handle, DWORD channel, void* buffer, DWORD lengt
 void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length)
 {
 	// Put available data in the level channel
-	BASS_StreamPutData(levelChannel, buffer, length * sizeof(short)); 
+	BASS_StreamPutData(levelChannel, buffer, length * sizeof(short));
 
 	// Get current microphone noise level from level channel
 	const DWORD currentMicLevel = BASS_ChannelGetLevel(levelChannel);
