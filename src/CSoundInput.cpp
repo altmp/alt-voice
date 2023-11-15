@@ -76,35 +76,8 @@ int CSoundInput::GetNumDevices() const
 	BASS_DEVICEINFO deviceInfo;
 	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
-		uint32_t deviceType = deviceInfo.flags & BASS_DEVICE_TYPE_MASK;
-		std::string deviceTypeName;
-
-		switch (deviceType)
-		{
-		case BASS_DEVICE_TYPE_NETWORK: deviceTypeName = "Network"; break;
-		case BASS_DEVICE_TYPE_SPEAKERS: deviceTypeName = "Speakers"; break;
-		case BASS_DEVICE_TYPE_LINE: deviceTypeName = "Line"; break;
-		case BASS_DEVICE_TYPE_HEADPHONES: deviceTypeName = "Headphones"; break;
-		case BASS_DEVICE_TYPE_MICROPHONE: deviceTypeName = "Microphone"; break;
-		case BASS_DEVICE_TYPE_HEADSET: deviceTypeName = "Headset"; break;
-		case BASS_DEVICE_TYPE_HANDSET: deviceTypeName = "Handset"; break;
-		case BASS_DEVICE_TYPE_DIGITAL: deviceTypeName = "Digital"; break;
-		case BASS_DEVICE_TYPE_SPDIF: deviceTypeName = "S/PDIF"; break;
-		case BASS_DEVICE_TYPE_HDMI: deviceTypeName = "HDMI"; break;
-		case BASS_DEVICE_TYPE_DISPLAYPORT: deviceTypeName = "DisplayPort"; break;
-		default: deviceTypeName = "Unknown"; break;
-		}
-
-		// Log all the flags
-		std::cout << "Device #" << i << ": " << deviceInfo.name << ", Type: " << deviceTypeName << std::endl;
-		std::cout << "Flags:" << std::endl;
-		std::cout << "  Enabled: " << ((deviceInfo.flags & BASS_DEVICE_ENABLED) ? "Yes" : "No") << std::endl;
-		std::cout << "  Default: " << ((deviceInfo.flags & BASS_DEVICE_DEFAULT) ? "Yes" : "No") << std::endl;
-		std::cout << "  Initialized: " << ((deviceInfo.flags & BASS_DEVICE_INIT) ? "Yes" : "No") << std::endl;
-		std::cout << "  Loopback: " << ((deviceInfo.flags & BASS_DEVICE_LOOPBACK) ? "Yes" : "No") << std::endl;
-		std::cout << "  Default Communications: " << ((deviceInfo.flags & BASS_DEVICE_DEFAULTCOM) ? "Yes" : "No") << std::endl << std::endl;
-
-		if (deviceInfo.flags & BASS_DEVICE_ENABLED)
+		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
+			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK))
 		{
 			numDevices++;
 		}
@@ -118,7 +91,8 @@ uint32_t CSoundInput::GetDeviceIdFromIndex(int index) const
 	int indexCounter = 0;
 	for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 	{
-		if (deviceInfo.flags & BASS_DEVICE_ENABLED)
+		if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
+			!(deviceInfo.flags & BASS_DEVICE_LOOPBACK))
 		{
 			if (indexCounter == index)
 				return i;
@@ -152,7 +126,8 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	{
 		for (uint32_t i = 0; BASS_RecordGetDeviceInfo(i, &deviceInfo); i++)
 		{
-			if (deviceInfo.flags & BASS_DEVICE_ENABLED)
+			if (deviceInfo.flags & BASS_DEVICE_ENABLED &&
+				!(deviceInfo.flags & BASS_DEVICE_LOOPBACK))
 			{
 				if (!strcmp(deviceInfo.driver, uid))
 				{
