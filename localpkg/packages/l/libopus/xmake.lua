@@ -7,7 +7,7 @@ package("libopus")
              "https://gitlab.xiph.org/xiph/opus.git")
 
     add_versions("1.3.1", "65b58e1e25b2a114157014736a3d9dfeaad8d41be1c8179866f144a2fb44ff9d")
-    add_patches("1.3.1", path.join(os.scriptdir(), "patches", "1.3.1", "cmake.patch"), "603c746006d3f1f44700bc55fd46c2b466c5002b3612055af0216463a115c42f")
+    add_patches("1.3.1", path.join(os.scriptdir(), "patches", "1.3.1", "cmake.patch"), "c928fecab1eead857216c8eb459d62209eb16d205f62d562da72a4ccc0b5e804")
     add_configs("avxSupported", { description = "AVX_SUPPORTED", default = true, type = "boolean" })
     add_configs("opusx86MayHaveAvx", { description = "OPUS_X86_MAY_HAVE_AVX", default = true, type = "boolean" })
 

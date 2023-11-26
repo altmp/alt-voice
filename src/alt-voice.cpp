@@ -120,11 +120,11 @@ AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder)
 	}
 }
 
-AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter)
+AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter, int channels)
 {
 	try
 	{
-		IAudioFilter* filter = new CAudioFilter(SAMPLE_RATE, AUDIO_CHANNELS, BASS_STREAM_DECODE);
+		IAudioFilter* filter = new CAudioFilter(SAMPLE_RATE, channels, BASS_STREAM_DECODE);
 		*audioFilter = filter;
 		return AltVoiceError::Ok;
 	}

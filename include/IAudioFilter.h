@@ -5,7 +5,7 @@ public:
 	virtual ~IAudioFilter() = default;
 
 	[[nodiscard]] virtual uint32_t ApplyRotateEffect(float fRate, int priority) const = 0;
-	[[nodiscard]] virtual uint32_t ApplyVolumeEffect(float fVolume, int priority) const = 0;
+	[[nodiscard]] virtual uint32_t ApplyVolumeEffect(float fVolume, int priority, int channel) const = 0;
 	[[nodiscard]] virtual uint32_t ApplyPeakeqEffect(int lBand, float fBandwidth, float fQ, float fCenter, float fGain, int priority) const = 0;
 	[[nodiscard]] virtual uint32_t ApplyDampEffect(float fTarget, float fQuiet, float fRate, float fGain, float fDelay, int priority) const = 0;
 	[[nodiscard]] virtual uint32_t ApplyAutowahEffect(float fDryMix, float fWetMix, float fFeedback, float fRate, float fRange, float fFreq, int priority) const = 0;

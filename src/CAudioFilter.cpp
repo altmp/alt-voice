@@ -27,11 +27,11 @@ uint32_t CAudioFilter::ApplyRotateEffect(float fRate, int priority) const
 	return effectHandle;
 }
 
-uint32_t CAudioFilter::ApplyVolumeEffect(float fVolume, int priority) const
+uint32_t CAudioFilter::ApplyVolumeEffect(float fVolume, int priority, int channel) const
 {
 	BASS_BFX_VOLUME effectData;
 	effectData.fVolume = fVolume;
-	effectData.lChannel = BASS_BFX_CHANALL;
+	effectData.lChannel = channel;
 
 	const HFX effectHandle = BASS_ChannelSetFX(Stream, BASS_FX_BFX_VOLUME, priority);
 	BASS_FXSetParameters(effectHandle, &effectData);

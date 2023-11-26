@@ -21,5 +21,5 @@ AltVoiceError AV_CreateOpusEncoder(IOpusEncoder** opusEncoder, int bitRate);
 AltVoiceError AV_CreateOpusDecoder(IOpusDecoder** opusDecoder);
 void AV_DestroyOpusEncoder(const IOpusEncoder* opusEncoder);
 void AV_DestroyOpusDecoder(const IOpusDecoder* opusDecoder);
-AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter);
+AltVoiceError AV_CreateAudioFilter(IAudioFilter** audioFilter, int channels);
 void AV_DestroyAudioFilter(const IAudioFilter* audioFilter);
