@@ -24,7 +24,7 @@ int main()
 	std::vector<std::string> inputDevices;
 	AV_Initialize();
 
-	AltVoiceError filterCreateError = AV_CreateAudioFilter(&RadioFilter);
+	AltVoiceError filterCreateError = AV_CreateAudioFilter(&RadioFilter, AUDIO_CHANNELS);
 
 	/*
 	auto bqLowEffect = RadioFilter->ApplyBqfEffect(0, 1400, 0, 0.86f, 0, 0, 1);
