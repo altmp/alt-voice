@@ -200,23 +200,16 @@ void CSoundInput::UpdateDevice()
 		return;
 	}
 
-	bool deviceAlive = false;
 	auto numDevices = GetNumDevices();
 	for (int i = 0; i < numDevices; i++)
 	{
 		const int deviceId = GetDeviceIdFromIndex(i);
 
 		if (strcmp(GetDeviceUID(deviceId), currentDeviceUID) == 0)
-		{
-			deviceAlive = true;
-			break;
-		}
+			return;
 	}
-	if (!deviceAlive)
-	{
-		deviceLost = true;
-		return;
-	}
+	
+	deviceLost = true;
 }
 
 void CSoundInput::RegisterCallback(OnVoiceCallback callback)
