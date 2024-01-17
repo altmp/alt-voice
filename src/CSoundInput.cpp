@@ -292,22 +292,32 @@ void CSoundInput::Normalize(void* buffer, DWORD sampleCount)
 	}
 
 	// Update normalizeMax using a running average or directly based on conditions
-	if (normalizeMax == 0.f || maxFrame > normalizeMax || normalizeMax / maxFrame < 0.5) {
-		normalizeMax = maxFrame;
+	bool forceReset = false;
+	if (normalizeMax == 0.f || maxFrame > normalizeMax)
+	{
+		forceReset = true;
+		normalizeMax = maxFrame * 1.5;
 	}
-	else {
+	else
+	{
+		// Probably this smoothing is not needed because of the smoothing below
 		normalizeMax = (normalizeMax * (NORMALIZE_FRAME_COUNT - 1) + maxFrame) / NORMALIZE_FRAME_COUNT;
 	}
 
-	if (normalizeMax <= 1.f) {
+	if (normalizeMax <= 1.f)
+	{
 		return;
 	}
 
 	float desiredGain = MAXSHORT / normalizeMax / 2;
-	desiredGain = std::fmin(desiredGain, 10.0f);
+	desiredGain = std::fmin(desiredGain, 3.0f);
 
 	// Smooth the transition of gain
-	currentNormalizationGain = (1 - NORMALIZE_SMOOTHING_FACTOR) * currentNormalizationGain + NORMALIZE_SMOOTHING_FACTOR * desiredGain;
+	currentNormalizationGain = !forceReset
+		? (1 - NORMALIZE_SMOOTHING_FACTOR) * currentNormalizationGain + NORMALIZE_SMOOTHING_FACTOR * desiredGain
+		: desiredGain;
+
+	// std::cout << "MaxFrame: " << normalizeMax << ", Desired gain: " << desiredGain << ", Current gain: " << currentNormalizationGain << std::endl;
 
 	auto shortSamples = static_cast<short*>(buffer);
 
