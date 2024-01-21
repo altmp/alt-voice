@@ -42,7 +42,7 @@ COpusEncoder::~COpusEncoder()
 	opus_encoder_destroy(encoder);
 }
 
-int COpusEncoder::EncodeShort(void* pcmData, size_t size, void* output, size_t outputSize)
+int COpusEncoder::EncodeShort(const void* pcmData, size_t size, void* output, size_t outputSize)
 {
 	const int len = opus_encode(encoder, (const opus_int16*)pcmData, size, (unsigned char*)output, outputSize);
 	if (len < 0 || len > outputSize)

@@ -16,7 +16,6 @@ class CSoundInput : public ISoundInput
 	static constexpr float NORMALIZE_SMOOTHING_FACTOR = 0.05f;
 
 	HRECORD recordChannel = 0;
-	HSTREAM levelChannel = 0;
 	COpusEncoder* encoder = nullptr;
 	int bitrate;
 
@@ -30,10 +29,8 @@ class CSoundInput : public ISoundInput
 	float normalizeMax = 0.f;
 
 	HFX VolumeChangeFX;
-	HFX LevelVolumeChangeFX;
 	DenoiseState* denoiser;
 
-	short writableBuffer[FRAME_SIZE_SAMPLES];
 	float floatBuffer[FRAME_SIZE_SAMPLES];
 	char* opusBuffer = nullptr;
 

@@ -11,5 +11,5 @@ public:
 	COpusEncoder(int sampleRate, int channels, int bitRate);
 	~COpusEncoder() override;
 
-	int EncodeShort(void* pcmData, size_t size, void* output, size_t outputSize) override;
+	int EncodeShort(const void* pcmData, size_t size, void* output, size_t outputSize) override;
 };

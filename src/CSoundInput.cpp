@@ -46,7 +46,6 @@ void CSoundInput::SetVolume(float gain)
 {
 	volume = gain;
 	const BASS_BFX_VOLUME VolumeChangeFXParams = { BASS_BFX_CHANALL, volume * 2 };
-	BASS_FXSetParameters(LevelVolumeChangeFX, &VolumeChangeFXParams);
 	BASS_FXSetParameters(VolumeChangeFX, &VolumeChangeFXParams);
 }
 
@@ -153,19 +152,13 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, OnSoundFrame, this);
 	BASS_ChannelSetAttribute(recordChannel, BASS_ATTRIB_GRANULE, FRAME_SIZE_SAMPLES);
 
-	levelChannel = BASS_StreamCreate(SAMPLE_RATE, AUDIO_CHANNELS, BASS_STREAM_DECODE, STREAMPROC_PUSH, this);
-
 	// Change input volume
-	LevelVolumeChangeFX = BASS_ChannelSetFX(levelChannel, BASS_FX_BFX_VOLUME, 0);
 	VolumeChangeFX = BASS_ChannelSetFX(recordChannel, BASS_FX_BFX_VOLUME, 0);
 
 	SetVolume(volume);
 
 	BASS_ChannelSetDSP(recordChannel, NoiseDSP, this, 2); //higher prio called first
 	BASS_ChannelSetDSP(recordChannel, NormalizeDSP, this, 1);
-
-	BASS_ChannelStart(levelChannel);
-	BASS_ChannelPlay(levelChannel, false);
 
 	if (!recordChannel)
 		return AltVoiceError::StartStream;
@@ -354,31 +347,24 @@ void CSoundInput::NoiseDSP(HDSP handle, DWORD channel, void* buffer, DWORD lengt
 
 void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD length)
 {
-	// Put available data in the level channel
-	BASS_StreamPutData(levelChannel, buffer, length * sizeof(short));
+	uint32_t numFrames = length / sizeof(short);
+	const int16_t* buffer2 = static_cast<const int16_t*>(buffer);
 
-	// Get current microphone noise level from level channel
-	const DWORD currentMicLevel = BASS_ChannelGetLevel(levelChannel);
-
-	// Get left channel noise level from it (because it's mono so right = left)
-	const uint16_t leftChannelLevel = LOWORD(currentMicLevel);
+	uint16_t maxFrame = 0;
+	for (int i = 0; i < numFrames; ++i)
+		maxFrame = std::max<uint16_t>(maxFrame, abs(buffer2[i]));
 
 	// Convert to float from 0.f to 1.f
-	micLevel = static_cast<float>(leftChannelLevel) / MaxShortFloatValue;
+	micLevel = static_cast<float>(maxFrame) / MaxShortFloatValue;
 
 	// Convert level to decibels
 	micLevelDb = (micLevel > 0 ? 20 * log10(micLevel) : -HUGE_VAL);
 	micLevelDb = std::clamp(micLevelDb, -100.f, 0.f) + 100.f;
 
-	// Remove data from level channel (is there a better way to do it?)
-	BASS_ChannelGetData(levelChannel, writableBuffer, length * sizeof(short));
-
-	// Copy mic data to output buffer
-	memcpy_s(writableBuffer, FRAME_SIZE_SAMPLES * sizeof(short), buffer, length);
-
 	if (VoiceCallback)
 	{
-		const int opusBufferSize = encoder->EncodeShort(writableBuffer, FRAME_SIZE_SAMPLES, opusBuffer, bitrate);
+		const int opusBufferSize = encoder->EncodeShort(buffer, numFrames, opusBuffer, bitrate);
+		std::cout << "opusBufferSize: " << opusBufferSize << std::endl;
 		VoiceCallback(opusBuffer, opusBufferSize);
 	}
 }
