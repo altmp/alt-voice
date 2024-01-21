@@ -364,7 +364,6 @@ void CSoundInput::SoundFrameCaptured(HRECORD handle, const void* buffer, DWORD l
 	if (VoiceCallback)
 	{
 		const int opusBufferSize = encoder->EncodeShort(buffer, numFrames, opusBuffer, bitrate);
-		std::cout << "opusBufferSize: " << opusBufferSize << std::endl;
 		VoiceCallback(opusBuffer, opusBufferSize);
 	}
 }
