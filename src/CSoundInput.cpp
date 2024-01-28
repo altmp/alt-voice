@@ -149,7 +149,7 @@ AltVoiceError CSoundInput::SelectDeviceByUID(const char* uid)
 
 	recording = true;
 
-	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, 0, OnSoundFrame, this);
+	recordChannel = BASS_RecordStart(SAMPLE_RATE, AUDIO_CHANNELS, MAKELONG(0, 20), OnSoundFrame, this);
 	BASS_ChannelSetAttribute(recordChannel, BASS_ATTRIB_GRANULE, FRAME_SIZE_SAMPLES);
 
 	// Change input volume
